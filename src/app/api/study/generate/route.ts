@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
+import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,7 @@ Guidelines for formatting the lesson:
 
 export async function POST(req: NextRequest) {
   try {
+    await getVerifiedUidFromRequest(req);
     const body = await req.json();
     const { concept, subject } = body;
 
@@ -43,6 +45,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ content: generatedContent });
   } catch (error: any) {
+    if (error instanceof FirebaseAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Study Content Generation API Error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate study content" },
