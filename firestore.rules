@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isParticipant(user1, user2) {
+      return isAuthenticated() && (request.auth.uid == user1 || request.auth.uid == user2);
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'receiverId', 'text', 'timestamp']) &&
+             data.senderId == request.auth.uid &&
+             data.text is string && data.text.size() > 0 && data.text.size() < 2000;
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['authorId', 'videoId', 'timestamp']) &&
+             data.authorId == request.auth.uid &&
+             data.videoId is string;
+    }
+
+    // ===================================
+    // EXAMER & Users Rules
+    // ===================================
+    match /users/{userId} {
+      allow read: if isAuthenticated(); 
+      allow write: if isOwner(userId);
+      
+      // Cascade to all subcollections for EXAMER (e.g. mentor_memory, progress_nodes, etc)
+      match /{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    match /mock_tests/{testId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Mock tests are read-only for students
+    }
+
+    // ===================================
+    // Music Social Platform Rules
+    // ===================================
+    match /matches/{matchId} {
+      allow read: if isParticipant(resource.data.user1, resource.data.user2);
+      allow create: if isAuthenticated() && isParticipant(request.resource.data.user1, request.resource.data.user2);
+    }
+
+    match /messages/{messageId} {
+      allow read: if isParticipant(resource.data.senderId, resource.data.receiverId);
+      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+    }
+
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+  }
+}

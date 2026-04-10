@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Next.js: Dev with Tracing",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "env": {
+                "OTEL_SERVICE_NAME": "examer",
+                "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318/v1/traces"
+            }
+        }
+    ]
+}
