@@ -101,7 +101,7 @@ export default function Navbar() {
         </div>
 
         {/* Notifications */}
-        <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors group border border-transparent hover:border-border-subtle">
+        <button aria-label="Notifications" className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors group border border-transparent hover:border-border-subtle">
           <Bell className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
         </button>
