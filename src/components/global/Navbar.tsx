@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Bell, Search, Flame, User } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Navbar() {
   const profile = useAuthStore((s) => s.profile);
+  const [searchShortcut, setSearchShortcut] = useState("Ctrl+K");
 
   // Calculate days until exam dynamically
   const daysUntilExam = useMemo(() => {
@@ -54,6 +54,11 @@ export default function Navbar() {
 
   const displayName = profile?.displayName?.split(" ")[0] || "Student";
 
+  useEffect(() => {
+    const isAppleDevice = /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
+    setSearchShortcut(isAppleDevice ? "⌘K" : "Ctrl+K");
+  }, []);
+
   return (
     <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-6 border-b border-border-default bg-white/90 backdrop-blur-xl transition-all duration-200">
       {/* Search */}
@@ -63,13 +68,14 @@ export default function Navbar() {
           <input
             type="text"
             placeholder="Search concepts, topics..."
+            aria-label="Search concepts and topics"
             className="w-full pl-9 pr-12 py-1.5 rounded-lg bg-surface-50 border border-border-default
               text-[13px] text-text-primary placeholder:text-text-muted font-medium
               focus:outline-none focus:border-brand-primary/30 focus:ring-2 focus:ring-brand-primary/10 focus:bg-white
               transition-all duration-200"
           />
           <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-text-muted bg-surface-100 px-1.5 py-0.5 rounded border border-border-subtle font-semibold tracking-wider">
-            ⌘K
+            {searchShortcut}
           </kbd>
         </div>
       </div>
@@ -95,7 +101,7 @@ export default function Navbar() {
         </div>
 
         {/* Notifications */}
-        <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors group border border-transparent hover:border-border-subtle">
+        <button aria-label="Notifications" className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors group border border-transparent hover:border-border-subtle">
           <Bell className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
         </button>

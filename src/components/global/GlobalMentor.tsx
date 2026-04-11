@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useMentorStore } from "@/store/useMentorStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
-import { X, Minimize2, Maximize2, Send, Sparkles, Volume2, VolumeX, Move } from "lucide-react";
+import { X, Minimize2, Maximize2, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
@@ -168,7 +168,7 @@ export default function GlobalMentor() {
             if (dataStr.includes("}{")) {
               dataStr = dataStr.replace(/}{/g, "}\n{");
               const splitData = dataStr.split("\n");
-              for (let sd of splitData) {
+              for (const sd of splitData) {
                 try {
                   const data = JSON.parse(sd);
                   if (data.type === "redirect" && data.route) {
@@ -227,7 +227,7 @@ export default function GlobalMentor() {
     }
   }, [dialogueHistory, currentDialogue, isStreaming]);
 
-  // Instead of returning null, we hide it via CSS so the drag state is preserved when returning from the study page
+  // Keep the component mounted and hide via CSS on study pages for smoother route transitions
   const isHidden = pathname?.includes("/study");
 
   return (
@@ -236,21 +236,17 @@ export default function GlobalMentor() {
         {isExpanded && (
           <motion.div
             layout
-            drag
-            dragMomentum={false}
-            dragElastic={0.1}
             initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="flex w-[min(420px,calc(100vw-1rem))] flex-col overflow-hidden rounded-[28px] border border-border-subtle bg-white/96 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:w-[420px] pointer-events-auto"
-            style={{ 
-              touchAction: "none", 
+            style={{
               height: isTall ? "calc(100vh - 5rem)" : "min(620px, calc(100vh - 5rem))",
               transition: "height 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
             }}
           >
-            <div className="flex items-center justify-between border-b border-border-subtle bg-white/70 backdrop-blur-md px-5 py-4 z-10 relative cursor-grab active:cursor-grabbing">
+            <div className="flex items-center justify-between border-b border-border-subtle bg-white/70 backdrop-blur-md px-5 py-4 z-10 relative">
               <div className="flex items-center gap-3">
                 <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm shrink-0">
                   <Sparkles className="w-4 h-4" />
@@ -263,10 +259,7 @@ export default function GlobalMentor() {
                   )}
                 </div>
                 <div className="select-none flex-1">
-                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                    EXAMER Mentor
-                    <Move className="w-3 h-3 text-text-muted opacity-50" />
-                  </h3>
+                  <h3 className="text-sm font-bold text-text-primary">EXAMER Mentor</h3>
                   <p className="text-[11px] font-medium text-text-secondary truncate max-w-[120px] sm:max-w-[160px]">
                     {isStreaming
                       ? "Typing a response"
@@ -487,16 +480,12 @@ export default function GlobalMentor() {
 
       <motion.button
         layout
-        drag
-        dragMomentum={false}
-        dragElastic={0.1}
         type="button"
         onClick={toggleExpanded}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         aria-label={isExpanded ? "Close mentor chat" : "Open mentor chat"}
-        className={`relative z-50 flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)] transition-all duration-300 pointer-events-auto cursor-grab active:cursor-grabbing ${isExpanded ? "scale-75 opacity-0 pointer-events-none" : "bg-brand-primary"}`}
-        style={{ touchAction: "none" }}
+        className={`relative z-50 flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)] transition-all duration-300 pointer-events-auto ${isExpanded ? "scale-75 opacity-0 pointer-events-none" : "bg-brand-primary"}`}
       >
         {(isPulsing || isStreaming) && !isExpanded && (
           <>

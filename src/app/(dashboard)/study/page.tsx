@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ReadingPane from "@/components/study-engine/ReadingPane";
 import ActiveRecallBox from "@/components/study-engine/ActiveRecallBox";
 import FeynmanInput from "@/components/study-engine/FeynmanInput";
@@ -26,11 +25,7 @@ import {
 } from "@/lib/firebase/firestore";
 import {
   BookOpen,
-  Play,
   ArrowRight,
-  BarChart3,
-  Zap,
-  Target,
   Trophy,
   Loader2,
 } from "lucide-react";
@@ -110,6 +105,13 @@ const mockQuestion: QuizQuestion = {
   difficulty: 2,
 };
 
+type FeynmanEvaluation = {
+  clarityScore: number;
+  misunderstandings: string[];
+  strengths: string[];
+  feedback: string;
+};
+
 type ConceptItem = {
   concept: MicroConcept;
   subject: string;
@@ -129,7 +131,7 @@ export default function StudyPage() {
   );
   const [timer, setTimer] = useState(0);
   const [isBlurring, setIsBlurring] = useState(false);
-  const [feynmanEval, setFeynmanEval] = useState<any>(null);
+  const [feynmanEval, setFeynmanEval] = useState<FeynmanEvaluation | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [score, setScore] = useState({ correct: 0, incorrect: 0, total: 0 });
   const [concepts, setConcepts] = useState<ConceptItem[]>([]);
@@ -366,7 +368,7 @@ export default function StudyPage() {
         .finally(() => setIsGeneratingQuestion(false));
 
       startStudySession(
-        item.concept as any,
+        item.concept as MicroConcept,
         item.subject,
         "unknown",
       );
@@ -448,7 +450,7 @@ export default function StudyPage() {
 
       setSelectedConcept(enrichedItem);
       startStudySession(
-        enrichedItem.concept as any,
+        enrichedItem.concept as MicroConcept,
         enrichedItem.subject,
         "unknown",
       );
@@ -505,7 +507,7 @@ export default function StudyPage() {
       };
       setSelectedConcept(fallbackItem);
       startStudySession(
-        fallbackItem.concept as any,
+        fallbackItem.concept as MicroConcept,
         fallbackItem.subject,
         "unknown",
       );
@@ -557,7 +559,7 @@ export default function StudyPage() {
             status === "review_24h"
               ? new Date(Date.now() + 24 * 60 * 60 * 1000)
               : undefined,
-        } as any);
+        } as Parameters<typeof saveProgressNode>[2]);
       } catch (err) {
         console.error("Error saving progress:", err);
       }
@@ -577,7 +579,7 @@ export default function StudyPage() {
 
       if (user && selectedConcept) {
         // Trigger dynamic explanation from AI mentor
-        const store = useStudyStore.getState();
+
         const metrics = useMetricsStore.getState();
         const config = {
           daysToExam: 40,
@@ -651,11 +653,11 @@ export default function StudyPage() {
                   } else if (data.text) {
                     useMentorStore.getState().appendStreamChunk(data.text);
                   }
-                } catch (e) {}
+                } catch { /* ignore parse error */ }
               }
             }
           }
-        } catch (e) {
+        } catch {
           // Fallback if API fails
           triggerMentor(
             "errors",

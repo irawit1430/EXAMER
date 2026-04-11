@@ -195,7 +195,7 @@ function parseMCQOptions(text: string): { question: string; options: { label: st
 
 function ActionLinkCard({ url, fullPage }: { url: string; fullPage?: boolean }) {
   let title = "Launch Mock Test";
-  let subtitle = "Your test is ready.";
+  const subtitle = "Your test is ready.";
 
   try {
     const urlObj = new URL(url, "http://localhost");
