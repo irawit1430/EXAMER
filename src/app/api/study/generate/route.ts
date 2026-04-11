@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLLMProvider } from "@/lib/llm/provider";
+import { ai } from "@/lib/gemini/client";
 import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
@@ -33,10 +33,12 @@ export async function POST(req: NextRequest) {
 
     const userPrompt = `Please teach me about "${concept}" in the context of the subject "${subject}".`;
 
-    const result = await getLLMProvider().generate({
-      messages: [{ role: "user", content: userPrompt }],
-      systemInstruction: LESSON_GENERATION_PROMPT,
-      model: "gemini-2.5-flash", // Hint primarily for gemini
+    const result = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        systemInstruction: LESSON_GENERATION_PROMPT,
+      },
+      contents: userPrompt,
     });
 
     const generatedContent = result.text || "";
