@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { auth, db } from "@/lib/firebase/config";
 import {
   createUserWithEmailAndPassword,
@@ -15,6 +15,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 
 export default function SignupPage() {
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -188,7 +189,7 @@ export default function SignupPage() {
             </label>
             <div className="relative">
               <input
-                type="password" // Assuming no show/hide password functionality is added here
+                type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => updateField("password", e.target.value)}
                 placeholder="••••••••"
@@ -196,8 +197,20 @@ export default function SignupPage() {
                     text-[13px] text-text-primary font-medium placeholder:text-text-muted
                     focus:outline-none focus:border-brand-primary/30 focus:ring-2 focus:ring-brand-primary/10 transition-all"
                 required
-                minLength={8} // Changed from 6 to 8 to match original
+                minLength={8}
               />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
 

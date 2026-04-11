@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
-  Brain,
 } from "lucide-react";
 
 const navItems = [
@@ -30,6 +29,14 @@ type SidebarProps = {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+
+  const isItemActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === href;
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <aside
@@ -61,7 +68,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = isItemActive(item.href);
           const Icon = item.icon;
           return (
             <Link

@@ -28,8 +28,8 @@ export default function DashboardLayout({
           {children}
         </main>
         
-        {/* Floating AI Agent perfectly aligned symmetrically to the 1440px main container grid */}
-        <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-end px-4 md:px-6 lg:px-8 pb-4 md:pb-6 lg:pb-8">
+        {/* Floating AI Agent anchored to the viewport so it never scrolls out of view */}
+        <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none px-3 sm:px-4 md:px-6 lg:px-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <div className="w-full max-w-[1440px] mx-auto flex justify-end">
             <div className="pointer-events-auto">
               <GlobalMentor />
