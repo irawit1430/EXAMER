@@ -168,24 +168,25 @@ export default function DashboardPage() {
         }
 
         // Enrich weak topics with concept names from syllabus
-        const enrichedWeakTopics = weakTopics.map((wt) => {
-          let name = wt.conceptId;
-          if (syllabusTree?.tree) {
-            for (const subject of syllabusTree.tree) {
-              for (const topic of subject.topics || []) {
-                for (const subTopic of topic.subTopics || []) {
-                  for (const mc of subTopic.microConcepts || []) {
-                    if (
-                      (mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-")) ===
-                      wt.conceptId
-                    ) {
-                      name = `${subject.name} — ${mc.name}`;
-                    }
+        const conceptMap = new Map<string, string>();
+        if (syllabusTree?.tree) {
+          for (const subject of syllabusTree.tree) {
+            for (const topic of subject.topics || []) {
+              for (const subTopic of topic.subTopics || []) {
+                for (const mc of subTopic.microConcepts || []) {
+                  const id =
+                    mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-");
+                  if (id) {
+                    conceptMap.set(id, `${subject.name} — ${mc.name}`);
                   }
                 }
               }
             }
           }
+        }
+
+        const enrichedWeakTopics = weakTopics.map((wt) => {
+          const name = conceptMap.get(wt.conceptId) || wt.conceptId;
           return { name, mastery: wt.mastery, attempts: wt.attempts };
         });
 
