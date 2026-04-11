@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
+import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs"; // Node runtime needed for heavier parsing if using external libs
 
@@ -35,6 +36,7 @@ Rules:
 
 export async function POST(req: NextRequest) {
   try {
+    await getVerifiedUidFromRequest(req);
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const rawText = formData.get("text") as string | null; // Allow client to send pre-parsed text
@@ -98,10 +100,6 @@ export async function POST(req: NextRequest) {
 
     let jsonString = result.text || "";
 
-    console.log("=== GEMINI SYLLABUS RAW RESPONSE ===");
-    console.log(jsonString.substring(0, 500) + "...");
-    console.log("====================================");
-
     // Clean up potential markdown formatting from Gemini
     jsonString = jsonString
       .replace(/```json/g, "")
@@ -110,10 +108,6 @@ export async function POST(req: NextRequest) {
 
     try {
       const parsedJSON = JSON.parse(jsonString);
-      console.log(
-        "Successfully parsed JSON. Has topics?",
-        Array.isArray(parsedJSON.topics),
-      );
       return NextResponse.json(parsedJSON);
     } catch (parseError) {
       console.error("Failed to parse Gemini output into JSON:", jsonString);
@@ -123,6 +117,9 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error: any) {
+    if (error instanceof FirebaseAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("\n\n=== SYLLABUS PARSER FATAL ERROR ===\n");
     console.error(error);
     console.error("\n===================================\n\n");

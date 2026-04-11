@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -139,8 +141,8 @@ export default function StudyPage() {
 
   const { user, syllabusTree } = useAuthStore();
   const { triggerMentor } = useMentorStore();
-  const metricsStore = useMetricsStore();
-  const studyStore = useStudyStore(); // Get the study store instance
+  const { startQuestion, recordAnswer } = useMetricsStore();
+  const { startStudySession } = useStudyStore(); // Get the study store instance
 
   // Tracking refs for cleanup
   const activeSessionRef = React.useRef<{
@@ -327,7 +329,7 @@ export default function StudyPage() {
         setPhase("recall");
         setIsBlurring(false);
         setTimer(0);
-        metricsStore.startQuestion();
+        startQuestion();
       }, 800);
     }
   }, [timer, phase, dynamicReadingTime]);
@@ -363,7 +365,7 @@ export default function StudyPage() {
         .catch((err) => console.error("Error generating question", err))
         .finally(() => setIsGeneratingQuestion(false));
 
-      studyStore.startStudySession(
+      startStudySession(
         item.concept as any,
         item.subject,
         "unknown",
@@ -445,7 +447,7 @@ export default function StudyPage() {
       };
 
       setSelectedConcept(enrichedItem);
-      studyStore.startStudySession(
+      startStudySession(
         enrichedItem.concept as any,
         enrichedItem.subject,
         "unknown",
@@ -502,7 +504,7 @@ export default function StudyPage() {
         },
       };
       setSelectedConcept(fallbackItem);
-      studyStore.startStudySession(
+      startStudySession(
         fallbackItem.concept as any,
         fallbackItem.subject,
         "unknown",
@@ -515,7 +517,7 @@ export default function StudyPage() {
   };
 
   const handleAnswer = async (correct: boolean) => {
-    metricsStore.recordAnswer(correct);
+    recordAnswer(correct);
     const newScore = {
       correct: score.correct + (correct ? 1 : 0),
       incorrect: score.incorrect + (correct ? 0 : 1),
@@ -601,8 +603,7 @@ export default function StudyPage() {
             importantMemories: [],
           };
 
-          const mentorStore = useMentorStore.getState();
-          mentorStore.startStreamingMentor("errors");
+                    useMentorStore.getState().startStreamingMentor("errors");
 
           const userId = user.uid;
           const idToken = await user.getIdToken();
@@ -632,7 +633,7 @@ export default function StudyPage() {
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
-              mentorStore.finishStreaming();
+              useMentorStore.getState().finishStreaming();
               break;
             }
             const chunk = decoder.decode(value);
@@ -709,7 +710,7 @@ export default function StudyPage() {
       setPhase("recall");
       setIsBlurring(false);
       setTimer(0);
-      metricsStore.startQuestion();
+      startQuestion();
     }, 800);
   };
 

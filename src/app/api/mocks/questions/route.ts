@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
 import { v4 as uuidv4 } from "uuid";
+import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,7 @@ The JSON must be an array of objects matching this exact format:
 
 export async function POST(req: NextRequest) {
   try {
+    await getVerifiedUidFromRequest(req);
     const body = await req.json();
     const { subjects, count = 10 } = body;
 
@@ -69,6 +71,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ questions: cleanQuestions });
   } catch (error: any) {
+    if (error instanceof FirebaseAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("Mock Questions API Error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate mock questions" },
