@@ -148,12 +148,13 @@ export default function MockTestTakingPage() {
     // Optionally update progress nodes if user exists. We use a batch simulation
     // Since Mock test spans across multiple concepts, we just update the specific concepts tested
     if (user) {
+       const promises = [];
        for (const q of questions) {
          const selected = answers[q.id];
          const isCorrect = selected === q.options.find(o => o.isCorrect)?.id;
          if (selected && q.conceptId) {
             // we do a blind set for mock simulation speed. (ideal app would read and increment properly)
-            await saveProgressNode(user.uid, {
+            promises.push(saveProgressNode(user.uid, {
               conceptId: q.conceptId,
               status: isCorrect ? "review_24h" : "learning",
               correctCount: isCorrect ? 1 : 0,
@@ -161,9 +162,10 @@ export default function MockTestTakingPage() {
               mistakeCount: isCorrect ? 0 : 1,
               feynmanClarityScore: 0,
               lastTested: new Date(),
-            } as any).catch(() => {});
+            } as any).catch(() => {}));
          }
        }
+       await Promise.all(promises);
     }
   };
 
