@@ -124,7 +124,7 @@ export class AgentRuntime {
         }
 
         // 2. Build the system instruction with injected context
-        let systemInstruction = SYSTEM_INSTRUCTION;
+        let systemInstruction = this.config.systemInstruction || SYSTEM_INSTRUCTION;
         systemInstruction += `\n\n${studentSnapshot}`;
 
         if (event.payload.context) {
@@ -164,12 +164,12 @@ Days to exam: ${ctx.daysToExam}
 
         // 4. Build tool declarations
         const tools: LLMToolFunction[] = this.config.enableToolCalling
-          ? toolRegistry.toGeminiFunctionDeclarations()
+          ? toolRegistry.toGeminiFunctionDeclarations(this.config.allowedTools)
           : [];
 
         // 5. Inject tool catalog into system prompt for models without native tool calling
         if (this.config.enableToolCalling) {
-          systemInstruction += "\n\n" + toolRegistry.toPromptDescription();
+          systemInstruction += "\n\n" + toolRegistry.toPromptDescription(this.config.allowedTools);
         }
 
         return { systemInstruction, messages, tools };

@@ -6,10 +6,23 @@
 // full pipeline: validate → load memory → delegate → persist.
 // =============================================
 
-import { getAgentRuntime } from "./agent";
 import { getSessionMemory, getLongTermMemory } from "./memory";
 import { getToolRegistry } from "./tools";
 import { traceAsync } from "@/lib/tracing";
+import { CoordinatorAgent } from "./agents/CoordinatorAgent";
+import { StudyMentorAgent } from "./agents/StudyMentorAgent";
+import { AssessmentAgent } from "./agents/AssessmentAgent";
+import { PlannerAgent } from "./agents/PlannerAgent";
+import { AnalyticsAgent } from "./agents/AnalyticsAgent";
+
+// Initialize Agent Instances
+const coordinatorAgent = new CoordinatorAgent();
+const agents = {
+  mentor: new StudyMentorAgent(),
+  assessment: new AssessmentAgent(),
+  planner: new PlannerAgent(),
+  analytics: new AnalyticsAgent(),
+};
 import type {
   AgentEvent,
   AgentResponse,
@@ -83,7 +96,6 @@ function validateEvent(event: Partial<AgentEvent>): {
  */
 async function handleChat(event: AgentEvent): Promise<AgentResponse> {
   const sessionMemory = getSessionMemory();
-  const runtime = getAgentRuntime();
 
   return traceAsync(
     "agent.handle_chat",
@@ -102,7 +114,12 @@ async function handleChat(event: AgentEvent): Promise<AgentResponse> {
         timestamp: Date.now(),
       });
 
-      // Generate response with tool calling
+      // 1. Coordinator determines the route
+      const route = event.payload.targetAgent || await coordinatorAgent.determineRoute(event);
+      console.log(`[Coordinator] Routing chat to: ${route}`);
+      const runtime = agents[route];
+
+      // 2. Specialized agent generates response
       const { text, toolResults } = await runtime.generateResponse(event);
 
       // Record the assistant's response
@@ -110,13 +127,15 @@ async function handleChat(event: AgentEvent): Promise<AgentResponse> {
         role: "model",
         content: text,
         timestamp: Date.now(),
-        metadata:
-          toolResults.length > 0
+        metadata: {
+          agentName: route,
+          ...(toolResults.length > 0
             ? {
                 toolName: toolResults.map((r) => r.toolName).join(", "),
                 toolResult: toolResults,
               }
-            : undefined,
+            : {}),
+        }
       });
 
       return {
@@ -137,7 +156,6 @@ async function handleChat(event: AgentEvent): Promise<AgentResponse> {
  */
 async function handleStreamingChat(event: AgentEvent): Promise<AgentResponse> {
   const sessionMemory = getSessionMemory();
-  const runtime = getAgentRuntime();
 
   return traceAsync(
     "agent.handle_streaming_chat",
@@ -156,7 +174,12 @@ async function handleStreamingChat(event: AgentEvent): Promise<AgentResponse> {
         timestamp: Date.now(),
       });
 
-      // Get the stream
+      // 1. Coordinator determines the route
+      const route = event.payload.targetAgent || await coordinatorAgent.determineRoute(event);
+      console.log(`[Coordinator] Routing streaming request to: ${route}`);
+      const runtime = agents[route];
+
+      // 2. Route the request
       const stream = await runtime.streamResponse(event);
 
       return {
@@ -465,6 +488,7 @@ export async function processStreamingChat(
   message: string,
   context?: AgentEvent["payload"]["context"],
   trigger?: string,
+  targetAgent?: "mentor" | "assessment" | "planner" | "analytics",
 ): Promise<ReadableStream<Uint8Array>> {
   const event: AgentEvent = {
     type: trigger ? "mentor_trigger" : "chat",
@@ -474,6 +498,7 @@ export async function processStreamingChat(
       message,
       context,
       trigger,
+      targetAgent,
     },
     timestamp: Date.now(),
   };

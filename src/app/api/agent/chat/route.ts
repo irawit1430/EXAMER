@@ -24,12 +24,13 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const authenticatedUid = await getVerifiedUidFromRequest(req);
 
-      const { sessionId, message, context, trigger } = body as {
+      const { sessionId, message, context, trigger, targetAgent } = body as {
         sessionId: string;
         userId?: string;
         message: string;
         context?: AgentContext;
         trigger?: string;
+        targetAgent?: "mentor" | "assessment" | "planner" | "analytics";
       };
 
       // --- Validate required fields ---
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
         message || "",
         context,
         trigger,
+        targetAgent
       );
 
       // --- Return SSE stream ---

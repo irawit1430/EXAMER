@@ -48,9 +48,14 @@ export default function MockTestTakingPage() {
   useEffect(() => {
     async function loadQuestions() {
       try {
+        const idToken = user ? await user.getIdToken() : null;
+        
         const res = await fetch("/api/mocks/questions", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...(idToken ? { "Authorization": `Bearer ${idToken}` } : {})
+          },
           body: JSON.stringify({ subjects, count: numQuestions }),
         });
         if (!res.ok) throw new Error("Failed to load questions");

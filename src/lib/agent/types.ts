@@ -26,6 +26,7 @@ export interface AgentEvent {
     context?: AgentContext;
     trigger?: string;
     history?: ConversationMessage[];
+    targetAgent?: "mentor" | "assessment" | "planner" | "analytics";
   };
   timestamp: number;
 }
@@ -124,6 +125,7 @@ export interface ConversationMessage {
     toolName?: string;
     toolResult?: unknown;
     trigger?: string;
+    agentName?: string;
   };
 }
 
@@ -190,6 +192,8 @@ export interface PerformanceSummary {
 
 export interface AgentConfig {
   model: string;
+  systemInstruction?: string; // Add specialized system instruction per agent
+  allowedTools?: string[]; // Restrict the tools available to an agent
   maxSessionMessages: number; // Sliding window limit
   summarizeAfter: number; // Trigger summarization after N messages
   temperature: number;

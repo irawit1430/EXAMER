@@ -138,8 +138,12 @@ export class ToolRegistry {
     return Array.from(this.tools.keys());
   }
 
-  toGeminiFunctionDeclarations(): GeminiFunctionDeclaration[] {
-    return Array.from(this.tools.values()).map((tool) => ({
+  toGeminiFunctionDeclarations(allowedTools?: string[]): GeminiFunctionDeclaration[] {
+    const toolsIter = allowedTools 
+      ? Array.from(this.tools.values()).filter(t => allowedTools.includes(t.name))
+      : Array.from(this.tools.values());
+
+    return toolsIter.map((tool) => ({
       name: tool.name,
       description: tool.description,
       parameters: {
@@ -164,8 +168,12 @@ export class ToolRegistry {
    * This ensures models that don't support native tool calling (DeepSeek, etc.)
    * can still invoke tools via the XML format we parse in provider.ts.
    */
-  toPromptDescription(): string {
-    const toolDescs = Array.from(this.tools.values()).map((tool) => {
+  toPromptDescription(allowedTools?: string[]): string {
+    const toolsIter = allowedTools 
+      ? Array.from(this.tools.values()).filter(t => allowedTools.includes(t.name))
+      : Array.from(this.tools.values());
+
+    const toolDescs = toolsIter.map((tool) => {
       const params = Object.entries(tool.parameters)
         .map(([key, schema]) => {
           const req = tool.requiredParams.includes(key)
