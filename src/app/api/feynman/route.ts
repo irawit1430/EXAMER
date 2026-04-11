@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { evaluateFeynman } from "@/lib/gemini/client";
+import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export async function POST(req: NextRequest) {
   try {
+    await getVerifiedUidFromRequest(req);
     const body = await req.json();
     const { concept, userExplanation } = body;
 
@@ -20,6 +22,12 @@ export async function POST(req: NextRequest) {
       status: 200,
     });
   } catch (error: any) {
+    if (error instanceof FirebaseAuthError) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: error.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     console.error("Feynman API Route Error:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Internal Server Error" }),

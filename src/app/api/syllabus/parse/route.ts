@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
+import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs"; // Node runtime needed for heavier parsing if using external libs
 
@@ -35,6 +36,7 @@ Rules:
 
 export async function POST(req: NextRequest) {
   try {
+    await getVerifiedUidFromRequest(req);
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const rawText = formData.get("text") as string | null; // Allow client to send pre-parsed text
@@ -123,6 +125,9 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error: any) {
+    if (error instanceof FirebaseAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("\n\n=== SYLLABUS PARSER FATAL ERROR ===\n");
     console.error(error);
     console.error("\n===================================\n\n");
