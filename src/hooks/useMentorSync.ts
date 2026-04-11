@@ -413,7 +413,6 @@ async function streamMentorResponse(
               data.type === "tool_call"
             ) {
               // We can log or visually indicate tool usage if we want
-              console.log("[MentorSync]", data.type, data.tool);
             } else if (data.text) {
               // Fallback for older format
               useMentorStore.getState().appendStreamChunk(data.text);

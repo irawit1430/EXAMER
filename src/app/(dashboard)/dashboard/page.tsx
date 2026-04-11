@@ -125,11 +125,10 @@ export default function DashboardPage() {
         // Build today's plan from syllabus tree (first few concepts)
         const todaysPlan: DashboardData["todaysPlan"] = [];
         if (syllabusTree?.tree) {
-          for (const subject of syllabusTree.tree) {
+          planLoop: for (const subject of syllabusTree.tree) {
             for (const topic of subject.topics || []) {
               for (const subTopic of topic.subTopics || []) {
                 for (const mc of subTopic.microConcepts || []) {
-                  if (todaysPlan.length >= 4) break;
                   todaysPlan.push({
                     id: mc.id || mc.name,
                     concept: mc.name,
@@ -137,12 +136,10 @@ export default function DashboardPage() {
                     status: "new" as const,
                     time: "—",
                   });
+                  if (todaysPlan.length >= 4) break planLoop;
                 }
-                if (todaysPlan.length >= 4) break;
               }
-              if (todaysPlan.length >= 4) break;
             }
-            if (todaysPlan.length >= 4) break;
           }
         }
 
@@ -171,7 +168,7 @@ export default function DashboardPage() {
         const enrichedWeakTopics = weakTopics.map((wt) => {
           let name = wt.conceptId;
           if (syllabusTree?.tree) {
-            for (const subject of syllabusTree.tree) {
+            searchLoop: for (const subject of syllabusTree.tree) {
               for (const topic of subject.topics || []) {
                 for (const subTopic of topic.subTopics || []) {
                   for (const mc of subTopic.microConcepts || []) {
@@ -180,6 +177,7 @@ export default function DashboardPage() {
                       wt.conceptId
                     ) {
                       name = `${subject.name} — ${mc.name}`;
+                      break searchLoop;
                     }
                   }
                 }

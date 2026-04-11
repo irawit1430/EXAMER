@@ -13,6 +13,9 @@ import {
   serverTimestamp,
   where,
   arrayUnion,
+  getCountFromServer,
+  aggregateField,
+  getAggregateFromServer,
 } from "firebase/firestore";
 import { auth, db } from "./config";
 import type {
@@ -234,6 +237,68 @@ export async function getAllProgressNodes(
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getAllProgressNodes", error);
       return [];
+    }
+    throw error;
+  }
+}
+
+export async function getMasteredConceptsCount(uid: string): Promise<number> {
+  if (shouldFallbackEarly("getMasteredConceptsCount")) return 0;
+  try {
+    const ref = collection(db, "users", uid, "progress_nodes");
+    const q = query(ref, where("status", "==", "mastered"));
+    const snap = await getCountFromServer(q);
+    return snap.data().count;
+  } catch (error: any) {
+    if (isPermissionDenied(error)) {
+      markFirestoreDenied("getMasteredConceptsCount", error);
+      return 0;
+    }
+    throw error;
+  }
+}
+
+export async function getProgressStats(uid: string): Promise<{
+  conceptsLearned: number;
+  conceptsMastered: number;
+  totalCorrect: number;
+  totalAttempts: number;
+}> {
+  if (shouldFallbackEarly("getProgressStats")) {
+    return {
+      conceptsLearned: 0,
+      conceptsMastered: 0,
+      totalCorrect: 0,
+      totalAttempts: 0,
+    };
+  }
+  try {
+    const ref = collection(db, "users", uid, "progress_nodes");
+
+    const [learnedSnap, masteredSnap, aggSnap] = await Promise.all([
+      getCountFromServer(query(ref, where("status", "!=", "new"))),
+      getCountFromServer(query(ref, where("status", "==", "mastered"))),
+      getAggregateFromServer(ref, {
+        totalCorrect: aggregateField.sum("correctCount"),
+        totalAttempts: aggregateField.sum("totalAttempts"),
+      }),
+    ]);
+
+    return {
+      conceptsLearned: learnedSnap.data().count,
+      conceptsMastered: masteredSnap.data().count,
+      totalCorrect: aggSnap.data().totalCorrect || 0,
+      totalAttempts: aggSnap.data().totalAttempts || 0,
+    };
+  } catch (error: any) {
+    if (isPermissionDenied(error)) {
+      markFirestoreDenied("getProgressStats", error);
+      return {
+        conceptsLearned: 0,
+        conceptsMastered: 0,
+        totalCorrect: 0,
+        totalAttempts: 0,
+      };
     }
     throw error;
   }
@@ -723,18 +788,10 @@ export async function getDashboardStats(uid: string): Promise<{
   averageSpeed: number;
   totalQuestionsAttempted: number;
 }> {
-  // Get all progress nodes
-  const progressNodes = await getAllProgressNodes(uid);
+  // Get aggregated progress stats
+  const { conceptsLearned, conceptsMastered, totalCorrect, totalAttempts } =
+    await getProgressStats(uid);
 
-  const conceptsLearned = progressNodes.filter(
-    (n) => n.status !== "new",
-  ).length;
-  const conceptsMastered = progressNodes.filter(
-    (n) => n.status === "mastered",
-  ).length;
-
-  const totalCorrect = progressNodes.reduce((s, n) => s + n.correctCount, 0);
-  const totalAttempts = progressNodes.reduce((s, n) => s + n.totalAttempts, 0);
   const overallAccuracy =
     totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
@@ -866,24 +923,42 @@ export async function getWeakTopics(
 ): Promise<
   Array<{ name: string; mastery: number; attempts: number; conceptId: string }>
 > {
-  const progressNodes = await getAllProgressNodes(uid);
+  if (shouldFallbackEarly("getWeakTopics")) return [];
+  try {
+    const ref = collection(db, "users", uid, "progress_nodes");
+    // We can't easily filter by (correctCount/totalAttempts) on server,
+    // but we can at least filter by status !== mastered and totalAttempts > 0
+    const q = query(
+      ref,
+      where("status", "in", ["new", "learning", "review_24h"]),
+      where("totalAttempts", ">", 0),
+    );
+    const snap = await getDocs(q);
 
-  // Filter nodes that have been attempted but are NOT mastered
-  const weak = progressNodes
-    .filter((n) => n.totalAttempts > 0 && n.status !== "mastered")
-    .map((n) => ({
-      name: n.conceptId, // Will be enriched with concept names from syllabus
-      conceptId: n.conceptId,
-      mastery:
-        n.totalAttempts > 0
-          ? Math.round((n.correctCount / n.totalAttempts) * 100)
-          : 0,
-      attempts: n.totalAttempts,
-    }))
-    .sort((a, b) => a.mastery - b.mastery)
-    .slice(0, topLimit);
+    const weak = snap.docs
+      .map((d) => {
+        const n = d.data();
+        return {
+          name: d.id,
+          conceptId: d.id,
+          mastery:
+            n.totalAttempts > 0
+              ? Math.round((n.correctCount / n.totalAttempts) * 100)
+              : 0,
+          attempts: n.totalAttempts || 0,
+        };
+      })
+      .sort((a, b) => a.mastery - b.mastery)
+      .slice(0, topLimit);
 
-  return weak;
+    return weak;
+  } catch (error: any) {
+    if (isPermissionDenied(error)) {
+      markFirestoreDenied("getWeakTopics", error);
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function getRecentActivity(

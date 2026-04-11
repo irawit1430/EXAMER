@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       const { context } = body;
 
       // Generate a unique session ID
-      const sessionId = `session_${authenticatedUid}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      const sessionId = `session_${authenticatedUid}_${Date.now()}_${crypto.randomUUID()}`;
 
       const event: AgentEvent = {
         type: "session_start",

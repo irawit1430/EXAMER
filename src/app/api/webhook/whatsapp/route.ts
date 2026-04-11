@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 
-// Secret token for verifying WhatsApp webhook requests (e.g., from Twilio or Meta Graph API)
-const WHATSAPP_VERIFY_TOKEN =
-  process.env.WHATSAPP_VERIFY_TOKEN || "examer_webhook_secret";
-
 /**
  * GET requests are typically used by WhatsApp/Meta to verify the webhook URL.
  */
 export async function GET(req: NextRequest) {
+  const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+
+  if (!WHATSAPP_VERIFY_TOKEN) {
+    console.error(
+      "Critical Configuration Error: WHATSAPP_VERIFY_TOKEN is not set.",
+    );
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+
   const url = new URL(req.url);
   const mode = url.searchParams.get("hub.mode");
   const token = url.searchParams.get("hub.verify_token");
@@ -46,6 +51,7 @@ export async function POST(req: NextRequest) {
         body.entry[0].changes[0].value.messages &&
         body.entry[0].changes[0].value.messages[0]
       ) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const phoneNumberId =
           body.entry[0].changes[0].value.metadata.phone_number_id;
         const from = body.entry[0].changes[0].value.messages[0].from; // sender's phone number
@@ -64,7 +70,7 @@ export async function POST(req: NextRequest) {
     } else {
       return new NextResponse("Not a WhatsApp API event", { status: 404 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("WhatsApp Webhook Error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
