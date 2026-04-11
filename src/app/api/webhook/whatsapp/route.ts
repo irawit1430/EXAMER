@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
 
   if (mode && token) {
     if (mode === "subscribe" && token === WHATSAPP_VERIFY_TOKEN) {
-      console.log("WEBHOOK_VERIFIED");
       // Return the challenge as plain text to pass verification
       return new NextResponse(challenge, { status: 200 });
     } else {
