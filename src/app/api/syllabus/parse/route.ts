@@ -100,10 +100,6 @@ export async function POST(req: NextRequest) {
 
     let jsonString = result.text || "";
 
-    console.log("=== GEMINI SYLLABUS RAW RESPONSE ===");
-    console.log(jsonString.substring(0, 500) + "...");
-    console.log("====================================");
-
     // Clean up potential markdown formatting from Gemini
     jsonString = jsonString
       .replace(/```json/g, "")
@@ -112,10 +108,6 @@ export async function POST(req: NextRequest) {
 
     try {
       const parsedJSON = JSON.parse(jsonString);
-      console.log(
-        "Successfully parsed JSON. Has topics?",
-        Array.isArray(parsedJSON.topics),
-      );
       return NextResponse.json(parsedJSON);
     } catch (parseError) {
       console.error("Failed to parse Gemini output into JSON:", jsonString);
