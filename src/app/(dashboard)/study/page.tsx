@@ -5,6 +5,9 @@ import ReadingPane from "@/components/study-engine/ReadingPane";
 import ActiveRecallBox from "@/components/study-engine/ActiveRecallBox";
 import FeynmanInput from "@/components/study-engine/FeynmanInput";
 import ConceptCard from "@/components/study-engine/ConceptCard";
+import LessonSkeleton from "@/components/study-engine/LessonSkeleton";
+import StudyMentorPanel from "@/components/study-engine/StudyMentorPanel";
+import CircularAccuracy from "@/components/analytics/CircularAccuracy";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -139,6 +142,49 @@ export default function StudyPage() {
   const metricsStore = useMetricsStore();
   const studyStore = useStudyStore(); // Get the study store instance
 
+  // Tracking refs for cleanup
+  const activeSessionRef = React.useRef<{
+    id: string | null;
+    uid: string | null;
+    conceptId: string | null;
+  }>({ id: null, uid: null, conceptId: null });
+
+  // Sync refs when they change
+  useEffect(() => {
+    activeSessionRef.current = {
+      id: currentSessionId,
+      uid: user?.uid || null,
+      conceptId: selectedConcept?.concept.id || null,
+    };
+  }, [currentSessionId, user, selectedConcept]);
+
+  // Cleanup on unmount or tab close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const active = activeSessionRef.current;
+      if (active.id && active.uid) {
+        // We use a beacon or direct firestore fetch if possible. 
+        // In client-side firebase, just calling the update is usually enough for SPA changes
+        // but for tab closes, it's best-effort.
+        const metrics = useMetricsStore.getState();
+        endStudySession(active.uid, active.id, {
+          endTime: new Date(),
+          conceptsStudied: active.conceptId ? [active.conceptId] : [],
+          questionsAttempted: metrics.questionsAttempted,
+          correctAnswers: metrics.correctCount,
+          averageSpeed: metrics.avgSecondsPerQuestion,
+        }).catch(console.error);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      handleBeforeUnload(); // Call on unmount
+    };
+  }, []);
+
   // Build concepts from syllabus tree + progress nodes
   useEffect(() => {
     async function loadConcepts() {
@@ -256,6 +302,14 @@ export default function StudyPage() {
     loadConcepts();
   }, [user, syllabusTree]);
 
+  // Add this right before your timer useEffects
+  const dynamicReadingTime = useMemo(() => {
+    if (!selectedConcept?.concept.content) return 150; // Fallback
+    const wordCount = selectedConcept.concept.content.split(/\s+/).length;
+    // Calculate seconds: (words / 200 wpm) * 60, minimum 45 seconds
+    return Math.max(45, Math.ceil((wordCount / 200) * 60)); 
+  }, [selectedConcept?.concept.content]);
+
   // Timer effect
   useEffect(() => {
     if (phase !== "reading") return;
@@ -265,9 +319,9 @@ export default function StudyPage() {
     return () => clearInterval(interval);
   }, [phase]);
 
-  // Auto-transition from reading to recall
+  // Auto-transition from reading to recall (Dynamic Version)
   useEffect(() => {
-    if (phase === "reading" && timer >= 150) {
+    if (phase === "reading" && timer >= dynamicReadingTime) {
       setIsBlurring(true);
       setTimeout(() => {
         setPhase("recall");
@@ -276,7 +330,7 @@ export default function StudyPage() {
         metricsStore.startQuestion();
       }, 800);
     }
-  }, [timer, phase]);
+  }, [timer, phase, dynamicReadingTime]);
 
   const handleSelectConcept = async (item: ConceptItem) => {
     // Stop any ongoing mentor stream
@@ -510,6 +564,15 @@ export default function StudyPage() {
     if (correct) {
       setTimeout(() => setPhase("complete"), 500);
     } else {
+      // 1. Give them 2 seconds to see the red "Incorrect" UI
+      setTimeout(() => {
+        setIsBlurring(true);
+        setTimeout(() => {
+          setPhase("feynman"); // Auto-route to Feynman Mode!
+          setIsBlurring(false);
+        }, 600);
+      }, 2000);
+
       if (user && selectedConcept) {
         // Trigger dynamic explanation from AI mentor
         const store = useStudyStore.getState();
@@ -685,166 +748,166 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in">
-      {/* Phase: Select Concept */}
-      {phase === "select" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-display font-bold text-text-primary flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-brand-primary" />
-                Study Session
-              </h1>
-              <p className="text-sm font-medium text-text-secondary mt-2">
-                {syllabusTree
-                  ? "Concepts from your syllabus."
-                  : "Pick a concept to begin."}{" "}
-                The AI adapts to your level.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default">
-                <BarChart3 className="w-3 h-3 mr-1" />
-                {score.correct} correct · {score.incorrect} wrong
-              </Badge>
-            </div>
-          </div>
-
-          {/* Loading State Overlay */}
-          {isGeneratingContent && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-[32px]">
-              <Loader2 className="w-10 h-10 animate-spin text-brand-primary mb-4" />
-              <h3 className="text-lg font-bold text-text-primary mb-1">
-                Generating AI Lesson
-              </h3>
-              <p className="text-sm font-medium text-text-secondary">
-                Tailoring content to your level...
-              </p>
-            </div>
-          )}
-
-          {/* Concept List */}
-          <div className="space-y-2 relative">
-            {concepts.slice(0, 10).map((item) => (
-              <ConceptCard
-                key={item.concept.id}
-                name={item.concept.name}
-                subject={item.subject}
-                status={item.status}
-                mastery={item.mastery}
-                mistakeCount={item.mistakes}
-                lastTested="—"
-                onClick={() =>
-                  !isGeneratingContent && handleSelectConcept(item)
-                }
-              />
-            ))}
-            {concepts.length === 0 && (
-              <Card className="p-8 text-center">
-                <p className="text-text-secondary font-medium">
-                  No concepts found. Complete onboarding to upload your
-                  syllabus.
+    <div className="grid lg:grid-cols-[1fr_400px] gap-8 max-w-screen-2xl mx-auto h-[calc(100vh-6rem)] animate-fade-in relative items-start">
+      {/* Left Column: Study Engine Interface */}
+      <div className="w-full h-full overflow-y-auto scrollbar-hide pb-20 pr-1">
+        {/* Phase: Select Concept */}
+        {phase === "select" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-display font-bold text-text-primary flex items-center gap-3">
+                  <BookOpen className="w-8 h-8 text-brand-primary" />
+                  Study Session
+                </h1>
+                <p className="text-[13px] tracking-[0.02em] font-medium text-text-secondary mt-2">
+                  {syllabusTree
+                    ? "Concepts from your syllabus. The AI adapts to your level."
+                    : "Pick a concept to begin. The AI adapts to your level."}
                 </p>
-              </Card>
+              </div>
+              <CircularAccuracy correct={score.correct} total={score.total} />
+            </div>
+
+            {/* Abstracted loading phase logic that doesn't jump the layout: */}
+            {isGeneratingContent ? (
+              <LessonSkeleton />
+            ) : (
+              <div className="space-y-2 relative">
+                {concepts.slice(0, 10).map((item) => (
+                  <ConceptCard
+                    key={item.concept.id}
+                    name={item.concept.name}
+                    subject={item.subject}
+                    status={item.status}
+                    mastery={item.mastery}
+                    mistakeCount={item.mistakes}
+                    lastTested="—"
+                    onClick={() =>
+                      !isGeneratingContent && handleSelectConcept(item)
+                    }
+                  />
+                ))}
+                {concepts.length === 0 && (
+                  <Card className="p-8 text-center rounded-[24px]">
+                    <p className="text-[13px] tracking-[0.02em] text-text-secondary font-medium">
+                      No concepts found. Complete onboarding to upload your
+                      syllabus.
+                    </p>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Phase: Reading */}
-      {phase === "reading" && selectedConcept && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Badge variant="learning" dot>
-              {selectedConcept.subject} · Level{" "}
-              {selectedConcept.concept.difficulty}
+        {/* Phase: Reading */}
+        {phase === "reading" && selectedConcept && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Badge variant="learning" dot>
+                {selectedConcept.subject} · Level{" "}
+                {selectedConcept.concept.difficulty}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSkipToRecall}
+                icon={<ArrowRight className="w-4 h-4" />}
+              >
+                Skip to recall
+              </Button>
+            </div>
+            <ReadingPane
+              content={selectedConcept.concept.content}
+              title={selectedConcept.concept.name}
+              duration={dynamicReadingTime}
+              timeElapsed={timer}
+              onTimerComplete={handleSkipToRecall}
+              isBlurring={isBlurring}
+            />
+          </div>
+        )}
+
+        {/* Phase: Active Recall */}
+        {phase === "recall" && (
+          <div className="space-y-4">
+            <Badge variant="review" dot>
+              Active Recall — Test Your Knowledge
             </Badge>
+            {isGeneratingQuestion ? (
+              <Card className="p-8 flex flex-col items-center justify-center rounded-[24px]">
+                <Loader2 className="w-8 h-8 animate-spin text-brand-primary mb-4" />
+                <p className="text-[13px] tracking-[0.02em] text-text-secondary font-medium">
+                  Generating your question...
+                </p>
+              </Card>
+            ) : currentQuestion ? (
+              <ActiveRecallBox
+                question={currentQuestion}
+                onAnswer={handleAnswer}
+                onRequestFeynman={() => setPhase("feynman")}
+              />
+            ) : (
+              <ActiveRecallBox
+                question={mockQuestion}
+                onAnswer={handleAnswer}
+                onRequestFeynman={() => setPhase("feynman")}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Phase: Feynman Mode */}
+        {phase === "feynman" && selectedConcept && (
+          <div className="space-y-4">
+            <Badge variant="learning" dot>
+              Feynman Mode — Explain It Simply
+            </Badge>
+            <FeynmanInput
+              conceptName={selectedConcept.concept.name}
+              onSubmit={handleFeynmanSubmit}
+              evaluation={feynmanEval}
+              isEvaluating={isEvaluating}
+            />
+          </div>
+        )}
+
+        {/* Phase: Complete */}
+        {phase === "complete" && (
+          <div className="flex flex-col items-center justify-center py-20 animate-slide-up">
+            <div className="w-24 h-24 rounded-[32px] bg-success/10 flex items-center justify-center mb-8 shadow-sm">
+              <Trophy className="w-12 h-12 text-success" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-text-primary mb-3">
+              Concept Mastered! 🎯
+            </h2>
+            <p className="text-[14px] font-medium text-text-secondary mb-3">
+              +4 points · Scheduled for 24h review
+            </p>
+            <div className="flex items-center gap-3 mb-10">
+              <Badge variant="mastered" dot>
+                Level Up
+              </Badge>
+              <span className="text-[12px] uppercase tracking-[0.15em] font-bold text-text-muted">
+                Score: {score.correct * 4 - score.incorrect}/
+                {(score.correct + score.incorrect) * 4}
+              </span>
+            </div>
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSkipToRecall}
+              onClick={handleCompleteAndNext}
               icon={<ArrowRight className="w-4 h-4" />}
             >
-              Skip to recall
+              Next Concept
             </Button>
           </div>
-          <ReadingPane
-            content={selectedConcept.concept.content}
-            title={selectedConcept.concept.name}
-            duration={150}
-            timeElapsed={timer}
-            onTimerComplete={handleSkipToRecall}
-            isBlurring={isBlurring}
-          />
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Phase: Active Recall */}
-      {phase === "recall" && (
-        <div className="space-y-4">
-          <Badge variant="review" dot>
-            Active Recall — Test Your Knowledge
-          </Badge>
-          {isGeneratingQuestion ? (
-            <Card className="p-8 flex flex-col items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-brand-primary mb-4" />
-              <p className="text-text-secondary font-medium">Generating your question...</p>
-            </Card>
-          ) : currentQuestion ? (
-            <ActiveRecallBox
-              question={currentQuestion}
-              onAnswer={handleAnswer}
-              onRequestFeynman={() => setPhase("feynman")}
-            />
-          ) : (
-            <ActiveRecallBox
-              question={mockQuestion}
-              onAnswer={handleAnswer}
-              onRequestFeynman={() => setPhase("feynman")}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Phase: Feynman Mode */}
-      {phase === "feynman" && selectedConcept && (
-        <FeynmanInput
-          conceptName={selectedConcept.concept.name}
-          onSubmit={handleFeynmanSubmit}
-          evaluation={feynmanEval}
-          isEvaluating={isEvaluating}
-        />
-      )}
-
-      {/* Phase: Complete */}
-      {phase === "complete" && (
-        <div className="flex flex-col items-center justify-center py-20 animate-slide-up">
-          <div className="w-24 h-24 rounded-[32px] bg-success/10 flex items-center justify-center mb-8 shadow-sm">
-            <Trophy className="w-12 h-12 text-success" />
-          </div>
-          <h2 className="text-3xl font-display font-bold text-text-primary mb-3">
-            Concept Mastered! 🎯
-          </h2>
-          <p className="text-sm font-medium text-text-secondary mb-3">
-            +4 points · Scheduled for 24h review
-          </p>
-          <div className="flex items-center gap-3 mb-10">
-            <Badge variant="mastered" dot>
-              Mastered
-            </Badge>
-            <span className="text-sm font-bold text-text-muted">
-              Score: {score.correct * 4 - score.incorrect}/
-              {(score.correct + score.incorrect) * 4}
-            </span>
-          </div>
-          <Button
-            onClick={handleCompleteAndNext}
-            icon={<ArrowRight className="w-4 h-4" />}
-          >
-            Next Concept
-          </Button>
-        </div>
-      )}
+      {/* Right Column: Embedded AI Mentor */}
+      <div className="hidden lg:block h-full w-full sticky top-0 pb-6 rounded-[24px]">
+        <StudyMentorPanel />
+      </div>
     </div>
   );
 }

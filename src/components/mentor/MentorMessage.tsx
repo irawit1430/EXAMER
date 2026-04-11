@@ -12,7 +12,9 @@ import {
   BookOpen,
   Sparkles,
   ArrowRight,
+  ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 
 // =============================================
 // Rich Mentor Message Renderer
@@ -35,7 +37,7 @@ interface MentorMessageProps {
 // --- Pattern Detection ---
 
 interface ParsedBlock {
-  type: "text" | "concept" | "mcq" | "feedback_correct" | "feedback_wrong" | "keypoint";
+  type: "text" | "concept" | "mcq" | "feedback_correct" | "feedback_wrong" | "keypoint" | "action_link";
   content: string;
   meta?: Record<string, string>;
 }
@@ -46,7 +48,9 @@ interface ParsedBlock {
  */
 function parseBlocks(text: string): ParsedBlock[] {
   const blocks: ParsedBlock[] = [];
-  const lines = text.split("\n");
+  // Ensure action links are isolated on their own lines for parsing
+  const textWithIsolatedLinks = text.replace(/(\/mocks\/[a-zA-Z0-9\-_=?&%.$]+)/g, "\n\n$1\n\n");
+  const lines = textWithIsolatedLinks.split("\n");
   let buffer: string[] = [];
   let i = 0;
 
@@ -143,6 +147,18 @@ function parseBlocks(text: string): ParsedBlock[] {
       continue;
     }
 
+    // Detect standalone action links (e.g., /mocks/...) 
+    const actionLinkMatch = line.match(/^\/mocks\/[a-zA-Z0-9\-_=?&%.$]+$/);
+    if (actionLinkMatch) {
+      flushBuffer();
+      blocks.push({
+        type: "action_link",
+        content: line.trim(),
+      });
+      i++;
+      continue;
+    }
+
     buffer.push(line);
     i++;
   }
@@ -176,6 +192,49 @@ function parseMCQOptions(text: string): { question: string; options: { label: st
 // =============================================
 // Sub-Components
 // =============================================
+
+function ActionLinkCard({ url, fullPage }: { url: string; fullPage?: boolean }) {
+  let title = "Launch Mock Test";
+  let subtitle = "Your test is ready.";
+
+  try {
+    const urlObj = new URL(url, "http://localhost");
+    const nameParam = urlObj.searchParams.get("name");
+    if (nameParam) {
+      title = nameParam;
+    }
+  } catch (e) {
+    // Ignore parsing errors
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`rounded-2xl border border-brand-accent/20 bg-gradient-to-br from-indigo-50/50 to-blue-50/30 p-5 flex flex-col sm:flex-row items-center justify-between gap-4 ${
+        fullPage ? "my-5" : "my-3"
+      }`}
+    >
+      <div className="flex items-center gap-4 flex-1">
+        <div className="w-12 h-12 rounded-full bg-brand-accent/10 flex items-center justify-center flex-shrink-0">
+          <ExternalLink className="w-5 h-5 text-brand-accent" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-text-primary text-sm line-clamp-2 leading-snug">
+            {title}
+          </h4>
+          <p className="text-xs text-text-muted mt-1">{subtitle}</p>
+        </div>
+      </div>
+      <Link
+        href={url}
+        className="w-full sm:w-auto px-5 py-2.5 bg-brand-accent text-white rounded-xl text-center text-sm font-medium hover:bg-brand-accent/90 transition-colors shadow-sm whitespace-nowrap"
+      >
+        Start Attempt
+      </Link>
+    </motion.div>
+  );
+}
 
 function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolean }) {
   const [expanded, setExpanded] = useState(true);
@@ -434,6 +493,8 @@ export default function MentorMessage({
 
         {blocks.map((block, idx) => {
           switch (block.type) {
+            case "action_link":
+              return <ActionLinkCard key={idx} url={block.content} fullPage={fullPage} />;
             case "concept":
               return <ConceptCard key={idx} content={block.content} fullPage={fullPage} />;
             case "mcq":

@@ -4,8 +4,7 @@
 // Manages all LLM interaction: prompt assembly, function calling,
 // streaming, and the autonomous tool-calling loop.
 //
-// Now provider-agnostic: uses Ollama Cloud (dev) or Gemini (prod)
-// via the LLM provider abstraction layer.
+// Uses Google Gemini via the LLM provider abstraction layer.
 // =============================================
 
 import { getLLMProvider } from "@/lib/llm/provider";
@@ -180,7 +179,7 @@ Days to exam: ${ctx.daysToExam}
 
   /**
    * Generate a non-streaming response with tool calling support
-   * Works with both Ollama Cloud and Gemini via the provider abstraction
+   * Uses Gemini via the LLM provider abstraction layer
    */
   async generateResponse(event: AgentEvent): Promise<{
     text: string;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ai } from "@/lib/gemini/client";
+import { getLLMProvider } from "@/lib/llm/provider";
 
 export const runtime = "nodejs";
 
@@ -31,12 +31,10 @@ export async function POST(req: NextRequest) {
 
     const userPrompt = `Please teach me about "${concept}" in the context of the subject "${subject}".`;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: userPrompt,
-      config: {
-        systemInstruction: LESSON_GENERATION_PROMPT,
-      },
+    const result = await getLLMProvider().generate({
+      messages: [{ role: "user", content: userPrompt }],
+      systemInstruction: LESSON_GENERATION_PROMPT,
+      model: "gemini-2.5-flash", // Hint primarily for gemini
     });
 
     const generatedContent = result.text || "";

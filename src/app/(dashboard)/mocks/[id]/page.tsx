@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { Loader2, ArrowRight, CheckCircle2, Trophy, Clock } from "lucide-react";
 import type { QuizQuestion } from "@/types";
 import { useAuthStore } from "@/store/useAuthStore";
-import { saveProgressNode } from "@/lib/firebase/firestore";
+import { saveProgressNode, createStudySession, endStudySession } from "@/lib/firebase/firestore";
 
 export default function MockTestTakingPage() {
   const { id } = useParams();
@@ -24,6 +24,26 @@ export default function MockTestTakingPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isFinished, setIsFinished] = useState(false);
   const [timer, setTimer] = useState(0);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Ref to track session for graceful cleanup on unmount/tab close
+  const activeSessionRef = useRef<{ id: string | null; uid: string | null; timer: number; questions: QuizQuestion[]; answers: Record<string, string> }>({
+    id: null,
+    uid: null,
+    timer: 0,
+    questions: [],
+    answers: {},
+  });
+
+  useEffect(() => {
+    activeSessionRef.current = {
+      id: currentSessionId,
+      uid: user?.uid || null,
+      timer,
+      questions,
+      answers,
+    };
+  }, [currentSessionId, user, timer, questions, answers]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -36,6 +56,18 @@ export default function MockTestTakingPage() {
         if (!res.ok) throw new Error("Failed to load questions");
         const data = await res.json();
         setQuestions(data.questions || []);
+
+        if (user && data.questions && data.questions.length > 0) {
+          const sessionId = await createStudySession(user.uid, {
+            conceptsStudied: data.questions.map((q: any) => q.conceptId || "mock"),
+            startTime: new Date(),
+            endTime: new Date(), // Temporary, will be updated on finish or unmount
+            questionsAttempted: 0,
+            correctAnswers: 0,
+            averageSpeed: 0,
+          });
+          setCurrentSessionId(sessionId);
+        }
       } catch (err) {
         console.error("Error loading mock questions:", err);
       } finally {
@@ -43,7 +75,41 @@ export default function MockTestTakingPage() {
       }
     }
     loadQuestions();
-  }, [subjects, numQuestions]);
+  }, [subjects, numQuestions, user]);
+
+  // Graceful cleanup on tab close / unmount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const active = activeSessionRef.current;
+      if (active.id && active.uid) {
+        // Calculate current stats realistically before unloading
+        let correct = 0;
+        let attempted = 0;
+        Object.entries(active.answers).forEach(([qId, ansId]) => {
+          const q = active.questions.find(qu => qu.id === qId);
+          if (q) {
+            attempted++;
+            if (q.options.find(o => o.isCorrect)?.id === ansId) correct++;
+          }
+        });
+
+        endStudySession(active.uid, active.id, {
+          endTime: new Date(),
+          conceptsStudied: active.questions.map(q => q.conceptId || "mock"),
+          questionsAttempted: attempted,
+          correctAnswers: correct,
+          averageSpeed: attempted > 0 ? active.timer / attempted : 0,
+        }).catch(console.error);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      handleBeforeUnload(); // Save final time immediately upon navigating away
+    };
+  }, []);
 
   // Basic timer
   useEffect(() => {

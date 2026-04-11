@@ -239,10 +239,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-5 animate-fade-in pb-8">
+    <div className="w-full mx-auto space-y-6 md:space-y-8 animate-fade-in pb-12">
       {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3 border-b border-border-default">
-        <div className="space-y-1.5">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 pb-5 border-b border-border-subtle">
+        <div className="space-y-2">
           <p className="text-[11px] font-semibold tracking-widest uppercase text-text-muted">
             Overview
           </p>

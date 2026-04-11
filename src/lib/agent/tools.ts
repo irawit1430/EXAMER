@@ -3,11 +3,11 @@
 // =============================================
 // Structured function-calling system. The AI can autonomously
 // trigger these tools to help the student. Each tool is defined
-// with a JSON Schema for Gemini/Ollama function declarations.
+// with a JSON Schema for Gemini function declarations.
 //
 // NOW CONNECTED TO:
 // - Firebase Firestore (real student data)
-// - LLM Provider (Ollama Cloud / Gemini)
+// - LLM Provider (Gemini)
 // - Local long-term memory (fallback)
 // =============================================
 
@@ -197,7 +197,7 @@ ${toolDescs.join("\n\n")}`;
 // =============================================
 
 /**
- * generate_mcq — Creates dynamic MCQs using Ollama Cloud / Gemini
+ * generate_mcq — Creates dynamic MCQs using Gemini
  */
 function createGenerateMCQTool(config: AgentConfig): ToolDefinition {
   return {
@@ -304,7 +304,7 @@ Return ONLY valid JSON in this exact format, no markdown fencing:
 }`;
 
       try {
-        // Use the provider abstraction (Ollama Cloud or Gemini)
+        // Use the Gemini provider abstraction
         const provider = getLLMProvider();
         const result = await provider.generate({
           messages: [{ role: "user", content: prompt }],

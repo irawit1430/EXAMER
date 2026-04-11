@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ai } from "@/lib/gemini/client";
+import { getLLMProvider } from "@/lib/llm/provider";
 import { v4 as uuidv4 } from "uuid";
 
 export const runtime = "nodejs";
@@ -39,12 +39,10 @@ export async function POST(req: NextRequest) {
 
     const userPrompt = `Generate a single multiple-choice question testing the core intuition of the concept "${concept}" in the subject "${subject}". The conceptId is "${conceptId || uuidv4()}". Make it perfectly tailored to a competitive exam level.`;
 
-    const result = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: userPrompt,
-      config: {
-        systemInstruction: MCQ_GENERATION_PROMPT,
-      },
+    const result = await getLLMProvider().generate({
+      messages: [{ role: "user", content: userPrompt }],
+      systemInstruction: MCQ_GENERATION_PROMPT,
+      model: "gemini-2.5-flash", // Used as a hint
     });
 
     let jsonString = result.text || "{}";

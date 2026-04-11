@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useMentorStore } from "@/store/useMentorStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
-import { X, Minimize2, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { X, Minimize2, Maximize2, Send, Sparkles, Volume2, VolumeX, Move } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
@@ -17,6 +17,7 @@ function formatMentorTime(timestamp: number): string {
 
 export default function GlobalMentor() {
   const router = useRouter();
+  const pathname = usePathname();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
   const {
@@ -33,6 +34,7 @@ export default function GlobalMentor() {
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [isTall, setIsTall] = useState(false);
 
   const quickPrompts = useMemo(() => {
     const favoriteSubject = profile?.favoriteSubject || "this subject";
@@ -218,24 +220,39 @@ export default function GlobalMentor() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      // Optimizized scroll rendering: let the browser handle it in the next paint cycle to avoid jank
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
     }
-  }, [dialogueHistory, currentDialogue]);
+  }, [dialogueHistory, currentDialogue, isStreaming]);
+
+  // Instead of returning null, we hide it via CSS so the drag state is preserved when returning from the study page
+  const isHidden = pathname?.includes("/study");
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex max-w-[calc(100vw-1rem)] flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className={`flex flex-col items-end gap-4 pointer-events-none ${isHidden ? "hidden" : ""}`}>
       <AnimatePresence>
         {isExpanded && (
           <motion.div
+            layout
+            drag
+            dragMomentum={false}
+            dragElastic={0.1}
             initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="flex h-[min(620px,calc(100vh-5rem))] w-[min(420px,calc(100vw-1rem))] flex-col overflow-hidden rounded-[28px] border border-border-default bg-white/96 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:w-[420px]"
+            className="flex w-[min(420px,calc(100vw-1rem))] flex-col overflow-hidden rounded-[28px] border border-border-subtle bg-white/96 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:w-[420px] pointer-events-auto"
+            style={{ 
+              touchAction: "none", 
+              height: isTall ? "calc(100vh - 5rem)" : "min(620px, calc(100vh - 5rem))",
+              transition: "height 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
+            }}
           >
-            <div className="flex items-center justify-between border-b border-border-default bg-white px-5 py-4">
+            <div className="flex items-center justify-between border-b border-border-subtle bg-white/70 backdrop-blur-md px-5 py-4 z-10 relative cursor-grab active:cursor-grabbing">
               <div className="flex items-center gap-3">
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm">
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-primary text-white shadow-sm shrink-0">
                   <Sparkles className="w-4 h-4" />
                   {isStreaming && (
                     <motion.div
@@ -245,11 +262,12 @@ export default function GlobalMentor() {
                     />
                   )}
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-text-primary">
+                <div className="select-none flex-1">
+                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
                     EXAMER Mentor
+                    <Move className="w-3 h-3 text-text-muted opacity-50" />
                   </h3>
-                  <p className="text-[11px] font-medium text-text-secondary">
+                  <p className="text-[11px] font-medium text-text-secondary truncate max-w-[120px] sm:max-w-[160px]">
                     {isStreaming
                       ? "Typing a response"
                       : dialogueHistory.length > 0
@@ -259,143 +277,166 @@ export default function GlobalMentor() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <span
-                  className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${isStreaming ? "border-brand-accent/20 bg-brand-accent/5 text-brand-accent" : "border-border-subtle bg-surface-50 text-text-muted"}`}
+                  className={`hidden sm:inline-block rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] select-none ${isStreaming ? "border-brand-accent/20 bg-brand-accent/5 text-brand-accent" : "border-border-subtle bg-surface-50 text-text-muted"}`}
                 >
                   {isStreaming ? "Thinking" : "Live"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsMuted((value) => !value)}
-                  className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
-                  aria-label={
-                    isMuted ? "Unmute mentor voice" : "Mute mentor voice"
-                  }
-                >
-                  {isMuted ? (
-                    <VolumeX className="w-4 h-4" />
-                  ) : (
-                    <Volume2 className="w-4 h-4 text-brand-accent" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleExpanded}
-                  className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
-                  aria-label="Minimize mentor chat"
-                >
-                  <Minimize2 className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={dismissMentor}
-                  className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
-                  aria-label="Close mentor chat"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIsTall(!isTall); }}
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    aria-label={isTall ? "Shrink mentor chat" : "Expand mentor chat height"}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    {isTall ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIsMuted((value) => !value); }}
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    aria-label={
+                      isMuted ? "Unmute mentor voice" : "Mute mentor voice"
+                    }
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-4 h-4" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 text-brand-accent" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); toggleExpanded(); }}
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    aria-label="Minimize mentor chat"
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             <div
-              className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] px-4 py-4 scrollbar-hide sm:px-5 sm:py-5"
+              className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fafafa_0%,#ffffff_100%)] px-4 py-4 scrollbar-hide sm:px-5 sm:py-5 flex flex-col relative z-0"
               role="log"
               aria-live="polite"
               aria-relevant="additions text"
             >
               {dialogueHistory.length === 0 && !isStreaming ? (
-                <div className="flex h-full items-start justify-start py-2">
-                  <div className="w-full max-w-sm rounded-[24px] border border-border-default bg-white p-5 shadow-sm">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-text-muted">
+                <div className="flex flex-1 items-center justify-center py-2">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    transition={{ duration: 0.4 }}
+                    className="w-full max-w-sm rounded-[32px] border border-border-default/50 bg-gradient-to-b from-white to-surface-50 p-6 sm:p-8 shadow-xl shadow-brand-primary/5 text-center"
+                  >
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+                      <Sparkles className="h-6 w-6" />
+                    </div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-primary/60">
                       Conversation
                     </p>
-                    <h4 className="mt-2 text-xl font-display font-bold text-text-primary">
+                    <h4 className="mt-2 text-xl font-display font-bold text-text-primary tracking-tight">
                       Start a mentor exchange
                     </h4>
-                    <p className="mt-3 text-sm leading-6 text-text-secondary">
+                    <p className="mt-3 text-[14px] leading-6 text-text-secondary px-2">
                       Ask for a quiz, a simpler explanation, or a plan for{" "}
-                      {profile?.favoriteSubject ||
-                        "the topic you are working on"}
-                      .
+                      <span className="font-semibold text-text-primary">{profile?.favoriteSubject || "the current topic"}</span>.
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {quickPrompts.map((prompt) => (
-                        <button
+                    <div className="mt-6 flex flex-wrap justify-center gap-2">
+                      {quickPrompts.map((prompt, index) => (
+                        <motion.button
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 + index * 0.05, duration: 0.3 }}
                           key={prompt.label}
                           type="button"
                           onClick={() => handleSend(prompt.prompt)}
-                          className="rounded-full border border-border-default bg-surface-50 px-3 py-1.5 text-[11px] font-semibold text-text-primary transition-colors hover:border-brand-accent/30 hover:bg-white"
+                          className="rounded-full border border-border-default/80 bg-white px-4 py-2 text-[12px] font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary active:scale-95 shadow-sm"
                         >
                           {prompt.label}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {dialogueHistory.map((msg, i) => (
-                    <motion.div
-                      key={`${msg.timestamp}-${i}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[84%] rounded-2xl px-4 py-3 shadow-sm ${
-                          msg.role === "user"
-                            ? "rounded-br-sm bg-brand-primary text-white"
-                            : "rounded-bl-sm border border-border-default bg-white text-text-primary"
-                        }`}
+                  <AnimatePresence initial={false}>
+                    {dialogueHistory.map((msg, i) => (
+                      <motion.div
+                        key={`${msg.timestamp}-${i}`}
+                        layout
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                        className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
-                        <p
-                          className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${msg.role === "user" ? "text-white/70" : "text-text-muted"}`}
+                        <div
+                          className={`max-w-[84%] rounded-3xl px-5 py-4 shadow-sm ${
+                            msg.role === "user"
+                              ? "rounded-tr-[4px] bg-brand-primary text-white text-right"
+                              : "rounded-tl-[4px] border border-border-subtle bg-white text-text-primary text-left"
+                          }`}
                         >
-                          {msg.role === "user" ? "You" : "Mentor"}
-                        </p>
-                        <div className="mt-1 text-[14px] leading-6 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold">
-                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                          <p
+                            className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${msg.role === "user" ? "text-white/70" : "text-text-muted"}`}
+                          >
+                            {msg.role === "user" ? "You" : "Mentor"}
+                          </p>
+                          <div className="mt-1 text-[14px] leading-6 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold text-left inline-block">
+                            <ReactMarkdown>{msg.text}</ReactMarkdown>
+                          </div>
+                          <p
+                            className={`mt-2 text-[10px] ${msg.role === "user" ? "text-white/60" : "text-text-muted"}`}
+                          >
+                            {formatMentorTime(msg.timestamp)}
+                          </p>
                         </div>
-                        <p
-                          className={`mt-2 text-[10px] ${msg.role === "user" ? "text-white/60" : "text-text-muted"}`}
-                        >
-                          {formatMentorTime(msg.timestamp)}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))}
 
-                  {isStreaming && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex justify-start"
-                    >
-                      <div className="max-w-[84%] rounded-2xl rounded-bl-sm border border-border-default bg-white px-4 py-3 shadow-sm">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-muted">
-                          Mentor
-                        </p>
-                        {currentDialogue && currentDialogue !== "..." ? (
-                          <div className="mt-1 text-[14px] leading-6 text-text-primary [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold">
-                            <ReactMarkdown>{currentDialogue}</ReactMarkdown>
-                          </div>
-                        ) : (
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-surface-50 px-3 py-1 text-[12px] font-medium text-text-secondary">
-                            <span className="h-2 w-2 rounded-full bg-brand-accent animate-pulse" />
-                            Thinking...
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div ref={messagesEndRef} />
+                    {isStreaming && (
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                        className="flex w-full justify-start mt-2"
+                      >
+                        <div className="max-w-[84%] rounded-3xl rounded-tl-[4px] border border-border-subtle bg-white px-5 py-4 shadow-sm">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-muted">
+                            Mentor
+                          </p>
+                          {currentDialogue && currentDialogue !== "..." ? (
+                            <div className="mt-1 text-[14px] leading-6 text-text-primary [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold text-left inline-block">
+                              <ReactMarkdown>{currentDialogue}</ReactMarkdown>
+                            </div>
+                          ) : (
+                            <div className="mt-2 flex items-center h-[24px] gap-1.5 px-1 w-fit">
+                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <div ref={messagesEndRef} className="h-1" />
                 </div>
               )}
             </div>
 
-            <div className="border-t border-border-default bg-white p-4">
+            <div className="border-t border-border-subtle bg-white/80 backdrop-blur-sm p-4 relative z-10">
               {sendError && (
                 <div
                   role="alert"
@@ -405,7 +446,7 @@ export default function GlobalMentor() {
                 </div>
               )}
 
-              <div className="rounded-[24px] border border-border-default bg-surface-50 p-3 shadow-sm">
+              <div className="rounded-3xl border border-border-default/80 bg-white p-3 shadow-sm focus-within:border-brand-primary/50 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
                 <textarea
                   value={userInput}
                   onChange={(e) => {
@@ -415,26 +456,26 @@ export default function GlobalMentor() {
                   onKeyDown={handleKeyDown}
                   placeholder={
                     dialogueHistory.length > 0
-                      ? "Ask a follow-up, request a quiz, or explain what still feels unclear..."
-                      : "Ask for a quiz, explanation, or study plan..."
+                      ? "Ask a follow-up, request a quiz..."
+                      : "Ask for a quiz, explanation..."
                   }
                   rows={3}
-                  className="min-h-24 w-full resize-none border-none bg-transparent text-sm leading-6 text-text-primary placeholder:text-text-muted focus:outline-none"
+                  className="min-h-16 w-full resize-none border-none bg-transparent text-[14px] leading-6 text-text-primary px-2 placeholder:text-text-muted focus:outline-none"
                   aria-label="Message the EXAMER mentor"
                 />
 
-                <div className="mt-3 flex items-end justify-between gap-3">
+                <div className="mt-2 flex items-end justify-between gap-3 px-2 pb-1">
                   <p className="text-[11px] text-text-muted">
-                    Enter to send. Shift+Enter for a new line.
+                    Enter to send. <span className="hidden sm:inline">Shift+Enter for a new line.</span>
                   </p>
                   <button
                     type="button"
                     onClick={() => handleSend()}
                     disabled={!userInput.trim() || isStreaming}
-                    className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-primary/20 transition-all hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 active:scale-95"
                     aria-label="Send message to mentor"
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-4 h-4 ml-[-2px]" />
                     Send
                   </button>
                 </div>
@@ -445,12 +486,17 @@ export default function GlobalMentor() {
       </AnimatePresence>
 
       <motion.button
+        layout
+        drag
+        dragMomentum={false}
+        dragElastic={0.1}
         type="button"
         onClick={toggleExpanded}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         aria-label={isExpanded ? "Close mentor chat" : "Open mentor chat"}
-        className={`relative z-50 flex h-16 w-16 items-center justify-center rounded-full text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)] transition-all duration-300 ${isExpanded ? "scale-75 opacity-0 pointer-events-none" : "bg-brand-primary"}`}
+        className={`relative z-50 flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-full text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)] transition-all duration-300 pointer-events-auto cursor-grab active:cursor-grabbing ${isExpanded ? "scale-75 opacity-0 pointer-events-none" : "bg-brand-primary"}`}
+        style={{ touchAction: "none" }}
       >
         {(isPulsing || isStreaming) && !isExpanded && (
           <>
@@ -477,7 +523,7 @@ export default function GlobalMentor() {
         />
 
         {isPulsing && !isExpanded && (
-          <span className="absolute -top-10 left-1/2 w-max -translate-x-1/2 rounded-lg border border-border-default bg-white px-3 py-1 text-[10px] font-bold text-text-primary shadow-sm">
+          <span className="absolute -top-10 left-1/2 w-max -translate-x-1/2 rounded-lg border border-border-default bg-white px-3 py-1 text-[10px] font-bold text-text-primary shadow-sm pointer-events-none">
             New insight
           </span>
         )}

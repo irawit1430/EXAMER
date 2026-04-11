@@ -381,16 +381,24 @@ export async function getDashboardStats(uid: string): Promise<{
   const todaySessions = await getTodaysStudySessions(uid);
   let todayStudyMs = 0;
   for (const s of todaySessions) {
-    const end = s.endTime || new Date();
-    todayStudyMs += end.getTime() - s.startTime.getTime();
+    if (s.endTime) {
+      todayStudyMs += s.endTime.getTime() - s.startTime.getTime();
+    } else {
+      const elapsed = new Date().getTime() - s.startTime.getTime();
+      todayStudyMs += Math.min(elapsed, 30 * 60 * 1000); // Cap unclosed sessions at 30 minutes
+    }
   }
   const todayStudyMinutes = Math.round(todayStudyMs / (1000 * 60));
 
   const allSessions = await getStudySessions(uid, 1000);
   let totalStudyMs = 0;
   for (const s of allSessions) {
-    const end = s.endTime || new Date();
-    totalStudyMs += end.getTime() - s.startTime.getTime();
+    if (s.endTime) {
+      totalStudyMs += s.endTime.getTime() - s.startTime.getTime();
+    } else {
+      const elapsed = new Date().getTime() - s.startTime.getTime();
+      totalStudyMs += Math.min(elapsed, 30 * 60 * 1000); // Cap unclosed sessions at 30 minutes
+    }
   }
   const totalStudyHours =
     Math.round((totalStudyMs / (1000 * 60 * 60)) * 10) / 10;
