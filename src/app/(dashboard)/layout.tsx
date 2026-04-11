@@ -13,13 +13,13 @@ export default function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-surface text-text-primary">
+    <div className="flex h-screen bg-surface overflow-hidden text-text-primary">
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((value) => !value)}
       />
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-[margin-left] duration-300 relative ${
+        className={`flex-1 flex flex-col h-screen transition-[margin-left] duration-300 relative ${
           sidebarCollapsed ? "ml-[64px]" : "ml-[240px]"
         }`}
       >
