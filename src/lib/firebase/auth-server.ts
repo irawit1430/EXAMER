@@ -26,7 +26,7 @@ function isFirebaseAdminConfigError(error: unknown): boolean {
 
 function getDevBypassUid(req: NextRequest): string | null {
   if (process.env.NODE_ENV === "production") return null;
-  if (process.env.AGENT_ALLOW_DEV_UID_BYPASS === "false") return null;
+  if (process.env.AGENT_ALLOW_DEV_UID_BYPASS !== "true") return null;
 
   const headerUid = req.headers.get("x-user-id")?.trim();
   if (!headerUid) return null;
