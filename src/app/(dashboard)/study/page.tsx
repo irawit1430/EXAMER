@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import ReadingPane from "@/components/study-engine/ReadingPane";
 import ActiveRecallBox from "@/components/study-engine/ActiveRecallBox";
 import FeynmanInput from "@/components/study-engine/FeynmanInput";

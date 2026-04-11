@@ -279,8 +279,8 @@ export async function getProgressStats(uid: string): Promise<{
       getCountFromServer(query(ref, where("status", "!=", "new"))),
       getCountFromServer(query(ref, where("status", "==", "mastered"))),
       getAggregateFromServer(ref, {
-        totalCorrect: aggregateField.sum("correctCount"),
-        totalAttempts: aggregateField.sum("totalAttempts"),
+        totalCorrect: sum("correctCount"),
+        totalAttempts: sum("totalAttempts"),
       }),
     ]);
 
