@@ -1,0 +1,13 @@
+🧹 [code health] Remove unused variables in study page
+
+🎯 **What:** The code health issue addressed
+Removed unused imports, variables, and replaced explicit `any` types in `src/app/(dashboard)/study/page.tsx` that were hidden by the `@typescript-eslint/no-unused-vars` disable directive.
+
+💡 **Why:** How this improves maintainability
+Cleaning up dead code and enabling linting rules prevents future cruft accumulation, improves IDE auto-completion, and ensures better type safety by removing unnecessary `any` overrides.
+
+✅ **Verification:** How you confirmed the change is safe
+Ran `npx eslint src/app/(dashboard)/study/page.tsx` locally to confirm the file passes all linting rules, and ran the test suite to ensure no regressions were introduced.
+
+✨ **Result:** The improvement achieved
+A cleaner, type-safe file without unnecessary dependencies or unused local state variables.
