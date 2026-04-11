@@ -255,7 +255,7 @@ function createGenerateMCQTool(config: AgentConfig): ToolDefinition {
       // questions as chat text. This ensures proper UX with timer,
       // option selection, and score tracking.
       if (clampedCount >= 2) {
-        const testId = `sim-${Math.random().toString(36).substring(2, 9)}`;
+        const testId = `sim-${crypto.randomUUID()}`;
         const testName = `${topic} Quick Quiz`;
         const testUrl = `/mocks/${testId}?name=${encodeURIComponent(testName)}&subjects=${encodeURIComponent(topic)}&q=${clampedCount}`;
 
@@ -1293,7 +1293,7 @@ function createRecommendMockTestTool(): ToolDefinition {
     handler: async (params): Promise<ToolCallResult> => {
       const { testName, subjects, questionsCount } = params as any;
       const count = Math.min(Number(questionsCount) || 10, 30);
-      const testId = `sim-${Math.random().toString(36).substring(2, 9)}`;
+      const testId = `sim-${crypto.randomUUID()}`;
       const url = `/mocks/${testId}?name=${encodeURIComponent(testName)}&subjects=${encodeURIComponent(subjects)}&q=${count}`;
       
       return {
