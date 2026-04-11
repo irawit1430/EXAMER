@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import {
   getMockTests,
   saveMockTests,
-  getAllProgressNodes,
+  getMasteredConceptsCount,
   type MockTest,
 } from "@/lib/firebase/firestore";
 
@@ -71,10 +71,7 @@ export default function MocksPage() {
         );
 
         // Get mastered concepts count for unlock criteria
-        const progressNodes = await getAllProgressNodes(user.uid);
-        const mastered = progressNodes.filter(
-          (n) => n.status === "mastered",
-        ).length;
+        const mastered = await getMasteredConceptsCount(user.uid);
         setConceptsMastered(mastered);
       } catch (err) {
         console.error("Error loading mock tests:", err);
