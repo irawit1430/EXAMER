@@ -1,4 +1,6 @@
-💡 What: Optimized `src/app/(dashboard)/study/page.tsx` by using destructured selectors for Zustand store hooks (`useStudyStore` and `useMetricsStore`) instead of retrieving the entire store objects, and updated `mentorStore` streaming calls to retrieve state dynamically instead of subscribing to changes.
-🎯 Why: Calling `useStudyStore()` without a selector subscribes the entire `StudyPage` component to all store changes. Because the store contains a timer that updates every second during a study session, the entire page and its children were unnecessarily re-rendering every second. This caused significant performance degradation.
-📊 Impact: Eliminates unnecessary continuous re-renders of the entire StudyPage component during a study session. Reduces CPU usage and improves overall responsiveness and performance.
-🔬 Measurement: Can be verified using React Developer Tools Profiler by starting a study session and observing that `StudyPage` no longer re-renders every second when the internal timer ticks.
+🧹 Remove leftover debug log in whatsapp webhook
+
+🎯 What: Removed the `console.log("WEBHOOK_VERIFIED");` line in `src/app/api/webhook/whatsapp/route.ts` which was left over from debugging.
+💡 Why: Improves codebase cleanliness by removing unnecessary console logs in production endpoints, reducing noise in the application logs.
+✅ Verification: Ran `npm run test` which passed, and successfully compiled the project. Ensured the behavior of the webhook verification itself wasn't changed.
+✨ Result: Cleaner code, no behavior changes.
