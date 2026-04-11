@@ -14,7 +14,7 @@ import {
   where,
   arrayUnion,
   getCountFromServer,
-  aggregateField,
+  sum,
   getAggregateFromServer,
 } from "firebase/firestore";
 import { auth, db } from "./config";

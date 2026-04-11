@@ -95,6 +95,39 @@ async function getTodaysStudySessions(uid: string): Promise<StudySession[]> {
   });
 }
 
+export async function getUserByWhatsAppNumber(
+  whatsappNumber: string,
+): Promise<FirestoreUserProfile | null> {
+  const snapshot = await getAdminDb()
+    .collection("users")
+    .where("whatsappNumber", "==", whatsappNumber)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  const data = doc.data();
+  return {
+    uid: doc.id,
+    displayName: data.displayName || "Student",
+    email: data.email || "",
+    examDate: data.examDate ? data.examDate.toDate() : null,
+    targetExam: data.targetExam,
+    targetScore: data.targetScore || 0,
+    favoriteSubject: data.favoriteSubject || "",
+    dailyStudyTime: data.dailyStudyTime || "1h",
+    prepLevel: data.prepLevel || "Beginner",
+    personalizedAnswers: data.personalizedAnswers,
+    onboardingComplete: data.onboardingComplete || false,
+    predictedScore: data.predictedScore || 0,
+    streak: data.streak || { current: 0, longest: 0, lastActive: null },
+    createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+  };
+}
+
 export async function getUserProfile(
   uid: string,
 ): Promise<FirestoreUserProfile | null> {
