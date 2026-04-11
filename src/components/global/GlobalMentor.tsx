@@ -168,7 +168,7 @@ export default function GlobalMentor() {
             if (dataStr.includes("}{")) {
               dataStr = dataStr.replace(/}{/g, "}\n{");
               const splitData = dataStr.split("\n");
-              for (let sd of splitData) {
+              for (const sd of splitData) {
                 try {
                   const data = JSON.parse(sd);
                   if (data.type === "redirect" && data.route) {
