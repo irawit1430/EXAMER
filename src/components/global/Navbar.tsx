@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Bell, Search, Flame, User } from "lucide-react";
+import { Bell, Search, Flame, User, Menu } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export default function Navbar() {
+type NavbarProps = {
+  onMenuClick?: () => void;
+};
+
+export default function Navbar({ onMenuClick }: NavbarProps) {
   const profile = useAuthStore((s) => s.profile);
   const [searchShortcut, setSearchShortcut] = useState("Ctrl+K");
 
@@ -60,10 +64,20 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-6 border-b border-border-default bg-white/90 backdrop-blur-xl transition-all duration-200">
-      {/* Search */}
+    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 sm:px-6 border-b border-border-default bg-white/90 backdrop-blur-xl transition-all duration-200">
+      {/* Search & Mobile Menu */}
       <div className="flex items-center gap-3 flex-1 max-w-sm">
-        <div className="relative flex-1 group">
+        {onMenuClick && (
+          <button 
+            type="button" 
+            onClick={onMenuClick}
+            aria-label="Open sidebar"
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg hover:bg-surface-100 text-text-secondary hover:text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="relative flex-1 group hidden sm:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted transition-colors group-focus-within:text-brand-primary" />
           <input
             type="text"

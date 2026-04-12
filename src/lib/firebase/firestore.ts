@@ -293,14 +293,15 @@ export async function getProgressStats(uid: string): Promise<{
   } catch (error: any) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getProgressStats", error);
-      return {
-        conceptsLearned: 0,
-        conceptsMastered: 0,
-        totalCorrect: 0,
-        totalAttempts: 0,
-      };
+    } else {
+      console.warn("Error in getProgressStats:", error);
     }
-    throw error;
+    return {
+      conceptsLearned: 0,
+      conceptsMastered: 0,
+      totalCorrect: 0,
+      totalAttempts: 0,
+    };
   }
 }
 
@@ -396,9 +397,10 @@ export async function getStudySessions(
   } catch (error: any) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getStudySessions", error);
-      return [];
+    } else {
+      console.warn("Error in getStudySessions:", error);
     }
-    throw error;
+    return [];
   }
 }
 
@@ -432,9 +434,10 @@ export async function getTodaysStudySessions(
   } catch (error: any) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getTodaysStudySessions", error);
-      return [];
+    } else {
+      console.warn("Error in getTodaysStudySessions:", error);
     }
-    throw error;
+    return [];
   }
 }
 
@@ -860,12 +863,18 @@ export async function getWeeklySpeedAccuracy(uid: string): Promise<{
   sevenDaysAgo.setHours(0, 0, 0, 0);
 
   const ref = collection(db, "users", uid, "study_sessions");
-  const q = query(
-    ref,
-    where("startTime", ">=", Timestamp.fromDate(sevenDaysAgo)),
-    orderBy("startTime", "asc"),
-  );
-  const snap = await getDocs(q);
+  let snap = { docs: [] as any[] };
+  try {
+    const q = query(
+      ref,
+      where("startTime", ">=", Timestamp.fromDate(sevenDaysAgo)),
+      orderBy("startTime", "asc")
+    );
+    snap = await getDocs(q);
+  } catch (error: any) {
+    if (isPermissionDenied(error)) markFirestoreDenied("getWeeklySpeedAccuracy", error);
+    else console.warn("Error in getWeeklySpeedAccuracy:", error);
+  }
 
   // Bucket sessions by day-of-week index (0=Sun ... 6=Sat)
   const buckets: Record<
@@ -891,8 +900,15 @@ export async function getWeeklySpeedAccuracy(uid: string): Promise<{
     }
   });
 
-  // Build ordered arrays starting from Mon (index 1) through Sun (index 0)
-  const orderedDays = [1, 2, 3, 4, 5, 6, 0]; // Mon=1 ... Sun=0
+  // Build ordered arrays for the last 7 days, ending today
+  const orderedDays: number[] = [];
+  const todayIndex = new Date().getDay();
+  for (let i = 6; i >= 0; i--) {
+    let d = todayIndex - i;
+    if (d < 0) d += 7;
+    orderedDays.push(d);
+  }
+
   const speedData = orderedDays.map((dayIdx) => {
     const b = buckets[dayIdx];
     // Speed: average QPM across sessions that day
@@ -930,12 +946,12 @@ export async function getWeakTopics(
     // but we can at least filter by status !== mastered and totalAttempts > 0
     const q = query(
       ref,
-      where("status", "in", ["new", "learning", "review_24h"]),
-      where("totalAttempts", ">", 0),
+      where("status", "in", ["new", "learning", "review_24h"])
     );
     const snap = await getDocs(q);
 
     const weak = snap.docs
+      .filter((d) => d.data().totalAttempts > 0)
       .map((d) => {
         const n = d.data();
         return {
@@ -955,9 +971,10 @@ export async function getWeakTopics(
   } catch (error: any) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getWeakTopics", error);
-      return [];
+    } else {
+      console.warn("Error in getWeakTopics:", error);
     }
-    throw error;
+    return [];
   }
 }
 

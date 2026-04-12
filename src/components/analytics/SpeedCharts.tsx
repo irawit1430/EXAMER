@@ -75,21 +75,21 @@ export default function SpeedCharts({
   const maxAccuracy = 100;
 
   return (
-    <div className={`grid grid-cols-2 gap-4 ${className}`}>
+    <div className={`grid grid-cols-2 gap-6 ${className}`}>
       {/* Speed Chart */}
-      <div className="bg-surface-50 border border-border-subtle shadow-sm p-4 rounded-xl">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Speed (QPM)
+      <div className="flex flex-col">
+        <div className="flex flex-col mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-text-muted mb-0.5">
+            Avg Speed (QPM)
           </p>
-          <span className="text-sm font-bold text-accent-cyan">
+          <span className="text-xl font-display font-medium text-text-primary tracking-tight">
             {speedData.length > 0
               ? speedData[speedData.length - 1].value.toFixed(1)
               : "0"}
           </span>
         </div>
         {maxSpeed === 0 && accuracyData.every((d) => d.value === 0) ? (
-          <div className="h-24 flex items-center justify-center text-xs font-medium text-text-muted bg-surface-100 rounded-md border border-border-subtle border-dashed">
+          <div className="h-24 flex items-center justify-center text-xs font-medium text-text-muted bg-surface-50 rounded-sm border border-border-default border-dashed">
             No recent activity
           </div>
         ) : (
@@ -98,12 +98,12 @@ export default function SpeedCharts({
       </div>
 
       {/* Accuracy Chart */}
-      <div className="bg-surface-50 border border-border-subtle shadow-sm p-4 rounded-xl">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Accuracy (%)
+      <div className="flex flex-col">
+        <div className="flex flex-col mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-text-muted mb-0.5">
+            Accuracy
           </p>
-          <span className="text-sm font-bold text-success">
+          <span className="text-xl font-display font-medium text-text-primary tracking-tight">
             {accuracyData.length > 0
               ? accuracyData[accuracyData.length - 1].value.toFixed(0)
               : "0"}
@@ -111,7 +111,7 @@ export default function SpeedCharts({
           </span>
         </div>
         {maxSpeed === 0 && accuracyData.every((d) => d.value === 0) ? (
-          <div className="h-24 flex items-center justify-center text-xs font-medium text-text-muted bg-surface-100 rounded-md border border-border-subtle border-dashed">
+          <div className="h-24 flex items-center justify-center text-xs font-medium text-text-muted bg-surface-50 rounded-sm border border-border-default border-dashed">
             No recent activity
           </div>
         ) : (

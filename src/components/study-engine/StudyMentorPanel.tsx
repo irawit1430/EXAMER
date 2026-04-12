@@ -271,9 +271,9 @@ export default function StudyMentorPanel() {
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
               transition={{ duration: 0.4 }}
-              className="w-full max-w-sm rounded-[32px] border border-border-default/50 bg-gradient-to-b from-white to-surface-50 p-6 sm:p-8 shadow-xl shadow-brand-primary/5 text-center"
+              className="w-full max-w-sm rounded-2xl border border-border-default bg-surface-50 p-6 sm:p-8 text-center"
             >
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                 <Sparkles className="h-6 w-6" />
               </div>
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-primary/60">
@@ -295,7 +295,7 @@ export default function StudyMentorPanel() {
                     key={prompt.label}
                     type="button"
                     onClick={() => handleSend(prompt.prompt)}
-                    className="rounded-full border border-border-default/80 bg-white px-4 py-2 text-[12px] font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary active:scale-95 shadow-sm"
+                    className="rounded-full border border-border-default bg-white px-4 py-2 text-[12px] font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary/40 hover:bg-surface-50 hover:text-brand-primary"
                   >
                     {prompt.label}
                   </motion.button>
@@ -317,10 +317,10 @@ export default function StudyMentorPanel() {
                   className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[84%] rounded-3xl px-5 py-4 shadow-sm ${
+                    className={`max-w-[84%] rounded-xl px-5 py-4 ${
                       msg.role === "user"
                         ? "rounded-tr-[4px] bg-brand-primary text-white text-right"
-                        : "rounded-tl-[4px] border border-border-subtle bg-white text-text-primary text-left"
+                        : "rounded-tl-[4px] border border-border-default bg-white text-text-primary text-left"
                     }`}
                   >
                     <p
@@ -349,7 +349,7 @@ export default function StudyMentorPanel() {
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                   className="flex w-full justify-start mt-2"
                 >
-                  <div className="max-w-[84%] rounded-3xl rounded-tl-[4px] border border-border-subtle bg-white px-5 py-4 shadow-sm">
+                  <div className="max-w-[84%] rounded-xl rounded-tl-[4px] border border-border-default bg-white px-5 py-4">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-muted">
                       Mentor
                     </p>
@@ -392,14 +392,14 @@ export default function StudyMentorPanel() {
             aria-label="Type your message to the AI tutor"
             rows={1}
             disabled={isStreaming}
-            className="flex-1 w-full resize-none rounded-2xl border border-border-default/80 bg-white py-3.5 pl-5 pr-5 text-[14px] text-text-primary shadow-sm transition-all focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-primary/10 disabled:opacity-50"
+            className="flex-1 w-full resize-none rounded-xl border border-border-default bg-white py-3.5 pl-5 pr-5 text-[14px] text-text-primary transition-all focus:border-brand-primary focus:bg-white focus:outline-none disabled:opacity-50"
             style={{ minHeight: "52px", maxHeight: "120px" }}
           />
           <button
             type="button"
             onClick={() => handleSend()}
             disabled={!userInput.trim() || isStreaming}
-            className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand-primary text-white shadow-md shadow-brand-primary/20 transition-all hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 active:scale-95 flex-shrink-0"
+            className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-brand-primary text-white transition-all hover:bg-brand-primary/90 disabled:pointer-events-none disabled:opacity-50 flex-shrink-0"
             aria-label="Send message"
           >
             <Send className="w-5 h-5 ml-1" />

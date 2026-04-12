@@ -29,63 +29,80 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   init: () => {
-    // Listen to Firebase auth state changes
+    // Only initialize once
+    if (get().initialized) return;
+
+    // Set initialized to true immediately but keep loading true if we are waiting for profile
+    // Actually, AuthProvider relies on initialized being false to show the global loading screen.
+    // If we have an initial auth state, we process it and then set initialized to true.
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch or create user profile from Firestore
-        const docRef = doc(db, "users", firebaseUser.uid);
-        const docSnap = await getDoc(docRef);
+        try {
+          // Fetch or create user profile from Firestore
+          const docRef = doc(db, "users", firebaseUser.uid);
+          const docSnap = await getDoc(docRef);
 
-        let userProfile: UserProfile | null = null;
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          userProfile = {
-            ...data,
-            createdAt: data.createdAt?.toDate
-              ? data.createdAt.toDate()
-              : new Date(data.createdAt || Date.now()),
-            examDate: data.examDate?.toDate
-              ? data.examDate.toDate()
-              : new Date(data.examDate || Date.now()),
-            streak: {
-              ...data.streak,
-              lastActive: data.streak?.lastActive?.toDate
-                ? data.streak.lastActive.toDate()
-                : new Date(data.streak?.lastActive || Date.now()),
-            },
-            onboardingComplete: !!data.onboardingComplete,
-          } as UserProfile;
-        } else {
-          // If it doesn't exist, we'll create a basic one (usually handled during signup)
-          userProfile = {
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName || "Student",
-            email: firebaseUser.email || "",
-            examDate: new Date(),
-            predictedScore: 0,
-            streak: { current: 0, longest: 0, lastActive: new Date() },
-            whatsappOptIn: false,
-            targetScore: 0,
-            createdAt: new Date(),
-            onboardingComplete: false,
-          };
-          // Try saving it (non-blocking)
-          setDoc(docRef, userProfile).catch(console.error);
+          let userProfile: UserProfile | null = null;
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            userProfile = {
+              ...data,
+              createdAt: data.createdAt?.toDate
+                ? data.createdAt.toDate()
+                : new Date(data.createdAt || Date.now()),
+              examDate: data.examDate?.toDate
+                ? data.examDate.toDate()
+                : new Date(data.examDate || Date.now()),
+              streak: {
+                ...data.streak,
+                lastActive: data.streak?.lastActive?.toDate
+                  ? data.streak.lastActive.toDate()
+                  : new Date(data.streak?.lastActive || Date.now()),
+              },
+              onboardingComplete: !!data.onboardingComplete,
+            } as UserProfile;
+          } else {
+            // If it doesn't exist, we'll create a basic one (usually handled during signup)
+            userProfile = {
+              uid: firebaseUser.uid,
+              displayName: firebaseUser.displayName || "Student",
+              email: firebaseUser.email || "",
+              examDate: new Date(),
+              predictedScore: 0,
+              streak: { current: 0, longest: 0, lastActive: new Date() },
+              whatsappOptIn: false,
+              targetScore: 0,
+              createdAt: new Date(),
+              onboardingComplete: false,
+            };
+            // Try saving it (non-blocking)
+            setDoc(docRef, userProfile).catch(console.error);
+          }
+
+          set({
+            user: firebaseUser,
+            profile: userProfile,
+            loading: false,
+            initialized: true,
+          });
+
+          // Load syllabus tree in background
+          getSyllabusTree(firebaseUser.uid)
+            .then((tree) => {
+              if (tree) set({ syllabusTree: tree });
+            })
+            .catch(console.error);
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          // If firestore fetch fails, we still want to remove the loading screen
+          set({
+            user: firebaseUser,
+            profile: null,
+            loading: false,
+            initialized: true, // critical to exit loading screen
+          });
         }
-
-        set({
-          user: firebaseUser,
-          profile: userProfile,
-          loading: false,
-          initialized: true,
-        });
-
-        // Load syllabus tree in background
-        getSyllabusTree(firebaseUser.uid)
-          .then((tree) => {
-            if (tree) set({ syllabusTree: tree });
-          })
-          .catch(console.error);
       } else {
         set({ user: null, profile: null, loading: false, initialized: true });
       }

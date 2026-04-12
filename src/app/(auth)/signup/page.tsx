@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { auth, db } from "@/lib/firebase/config";
+import Button from "@/components/ui/Button";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -215,13 +216,15 @@ export default function SignupPage() {
           </div>
 
           <div className="pt-2">
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full h-10 bg-black text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-900 transition-all active:scale-[0.98] disabled:opacity-70"
+              loading={loading}
+              className="w-full"
+              size="md"
             >
-              {loading ? "Creating..." : "Create Account"}
-            </button>
+              Create Account
+            </Button>
           </div>
         </form>
 

@@ -327,9 +327,9 @@ export default function GlobalMentor() {
                     initial={{ opacity: 0, scale: 0.95 }} 
                     animate={{ opacity: 1, scale: 1 }} 
                     transition={{ duration: 0.4 }}
-                    className="w-full max-w-sm rounded-[32px] border border-border-default/50 bg-gradient-to-b from-white to-surface-50 p-6 sm:p-8 shadow-xl shadow-brand-primary/5 text-center"
+                    className="w-full max-w-sm rounded-2xl border border-border-default bg-surface-50 p-6 sm:p-8 text-center"
                   >
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                       <Sparkles className="h-6 w-6" />
                     </div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-primary/60">
@@ -351,7 +351,7 @@ export default function GlobalMentor() {
                           key={prompt.label}
                           type="button"
                           onClick={() => handleSend(prompt.prompt)}
-                          className="rounded-full border border-border-default/80 bg-white px-4 py-2 text-[12px] font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary/40 hover:bg-brand-primary/5 hover:text-brand-primary active:scale-95 shadow-sm"
+                          className="rounded-full border border-border-default bg-white px-4 py-2 text-[12px] font-semibold text-text-primary transition-all duration-200 hover:border-brand-primary/40 hover:bg-surface-50 hover:text-brand-primary"
                         >
                           {prompt.label}
                         </motion.button>
@@ -373,10 +373,10 @@ export default function GlobalMentor() {
                         className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
                         <div
-                          className={`max-w-[84%] rounded-3xl px-5 py-4 shadow-sm ${
+                          className={`max-w-[84%] rounded-xl px-5 py-4 ${
                             msg.role === "user"
                               ? "rounded-tr-[4px] bg-brand-primary text-white text-right"
-                              : "rounded-tl-[4px] border border-border-subtle bg-white text-text-primary text-left"
+                              : "rounded-tl-[4px] border border-border-default bg-white text-text-primary text-left"
                           }`}
                         >
                           <p
@@ -405,7 +405,7 @@ export default function GlobalMentor() {
                         transition={{ type: "spring", stiffness: 300, damping: 24 }}
                         className="flex w-full justify-start mt-2"
                       >
-                        <div className="max-w-[84%] rounded-3xl rounded-tl-[4px] border border-border-subtle bg-white px-5 py-4 shadow-sm">
+                        <div className="max-w-[84%] rounded-xl rounded-tl-[4px] border border-border-default bg-white px-5 py-4">
                           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-muted">
                             Mentor
                           </p>
@@ -439,7 +439,7 @@ export default function GlobalMentor() {
                 </div>
               )}
 
-              <div className="rounded-3xl border border-border-default/80 bg-white p-3 shadow-sm focus-within:border-brand-primary/50 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
+              <div className="rounded-xl border border-border-default bg-white p-3 focus-within:border-brand-primary/50 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
                 <textarea
                   value={userInput}
                   onChange={(e) => {
@@ -465,7 +465,7 @@ export default function GlobalMentor() {
                     type="button"
                     onClick={() => handleSend()}
                     disabled={!userInput.trim() || isStreaming}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-primary/20 transition-all hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-primary/90 disabled:pointer-events-none disabled:opacity-50"
                     aria-label="Send message to mentor"
                   >
                     <Send className="w-4 h-4 ml-[-2px]" />

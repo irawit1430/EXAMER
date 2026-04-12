@@ -318,7 +318,7 @@ export default function DashboardPage() {
       {/* Top Row: Score + Quick Stats */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Kinetic Score Display */}
-        <div className="xl:col-span-1 border border-border-default rounded-2xl overflow-hidden bg-white shadow-sm p-1">
+        <div className="xl:col-span-1 border border-border-default rounded-xl overflow-hidden bg-white p-0">
           <KineticScoreDisplay
             score={prediction.totalScore}
             maxScore={prediction.maxScore}
@@ -329,10 +329,9 @@ export default function DashboardPage() {
         {/* Quick Stats Grid */}
         <div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
           <Card
-            hover
-            className="flex flex-col justify-between p-4 bg-white border border-border-default shadow-sm rounded-xl"
+            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
           >
-            <div className="w-8 h-8 rounded-lg bg-surface-100 flex items-center justify-center border border-border-subtle mb-3">
+            <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <BookOpen className="w-4 h-4 text-text-secondary" />
             </div>
             <div>
@@ -346,10 +345,9 @@ export default function DashboardPage() {
           </Card>
 
           <Card
-            hover
-            className="flex flex-col justify-between p-4 bg-white border border-border-default shadow-sm rounded-xl"
+            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
           >
-            <div className="w-8 h-8 rounded-lg bg-surface-100 flex items-center justify-center border border-border-subtle mb-3">
+            <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <Clock className="w-4 h-4 text-text-secondary" />
             </div>
             <div>
@@ -364,11 +362,10 @@ export default function DashboardPage() {
           </Card>
 
           <Card
-            hover
-            className="flex flex-col justify-between p-4 bg-white border border-border-default shadow-sm rounded-xl"
+            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
           >
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center border border-emerald-100 mb-3">
-              <Target className="w-4 h-4 text-emerald-600" />
+            <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
+              <Target className="w-4 h-4 text-text-secondary" />
             </div>
             <div>
               <p className="text-3xl font-display font-bold text-text-primary tracking-tight">
@@ -382,11 +379,10 @@ export default function DashboardPage() {
           </Card>
 
           <Card
-            hover
-            className="flex flex-col justify-between p-4 bg-white border border-border-default shadow-sm rounded-xl"
+            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
           >
-            <div className="w-8 h-8 rounded-lg bg-brand-primary/5 flex items-center justify-center border border-brand-primary/10 mb-3">
-              <TrendingUp className="w-4 h-4 text-brand-primary" />
+            <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
+              <TrendingUp className="w-4 h-4 text-text-secondary" />
             </div>
             <div>
               <p className="text-3xl font-display font-bold text-text-primary tracking-tight">
@@ -403,7 +399,7 @@ export default function DashboardPage() {
       {/* Middle Row: Charts + Weak Topics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Speed & Accuracy Charts */}
-        <div className="lg:col-span-2 border border-border-default rounded-2xl overflow-hidden bg-white shadow-sm p-5">
+        <div className="lg:col-span-2 border border-border-default rounded-xl overflow-hidden bg-white p-5">
           <SpeedCharts
             speedData={displayData.speedData}
             accuracyData={displayData.accuracyData}
@@ -411,7 +407,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Weak Topics */}
-        <Card className="p-5 bg-white border border-border-default shadow-sm rounded-2xl flex flex-col">
+        <Card className="p-5 bg-white border border-border-default rounded-xl flex flex-col">
           <div className="flex items-center gap-2.5 mb-5">
             <div className="p-1.5 bg-red-50 rounded-lg text-red-500">
               <AlertTriangle className="w-4 h-4" />
@@ -464,59 +460,48 @@ export default function DashboardPage() {
       {/* Bottom Row: Today's Plan + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Today's Study Plan */}
-        <Card className="p-5 bg-white border border-border-default shadow-sm rounded-2xl">
-          <div className="flex items-center justify-between mb-5">
+        <Card className="p-5 bg-white border border-border-default rounded-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-brand-primary/10 rounded-lg text-brand-primary">
+              <div className="w-8 h-8 flex items-center justify-center bg-brand-primary/10 rounded-lg text-brand-primary border border-brand-primary/20">
                 <Zap className="w-4 h-4" />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-text-primary tracking-tight">
+              <div className="flex flex-col">
+                <h3 className="text-[13px] uppercase tracking-widest font-semibold text-text-muted mb-0.5">
                   Today&apos;s Plan
                 </h3>
-                <p className="text-[11px] font-medium text-text-muted">
-                  Generated from your syllabus
+                <p className="text-xl font-display font-medium text-text-primary tracking-tight">
+                  {displayData.todaysPlan.length} concepts planned
                 </p>
               </div>
             </div>
-            <Badge
-              variant="default"
-              className="bg-surface-100 border-border-subtle text-text-primary"
-            >
-              {displayData.todaysPlan.length} concepts
-            </Badge>
           </div>
           <div className="space-y-2">
             {displayData.todaysPlan.map((item) => (
               <Link
                 key={item.id}
                 href="/study"
-                className="flex items-center gap-3 p-3 rounded-xl bg-surface-50 border border-border-subtle hover:border-brand-primary/30 hover:bg-white hover:shadow-sm transition-all group"
+                className="flex items-center justify-between p-3 rounded-xl bg-surface-50 border border-border-default hover:border-brand-primary/50 transition-colors group"
               >
-                <Badge
-                  variant={item.status}
-                  dot
-                  size="sm"
-                  className="hidden sm:inline-flex w-20 justify-center"
-                >
-                  {item.status}
-                </Badge>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-text-primary truncate group-hover:text-brand-primary transition-colors">
-                    {item.concept}
-                  </p>
-                  <p className="text-[11px] font-medium text-text-secondary mt-0.5">
-                    {item.subject}
-                  </p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Badge
+                    variant={item.status}
+                    size="sm"
+                    className="hidden sm:inline-flex w-16 justify-center uppercase tracking-wider text-[9px] font-bold"
+                  >
+                    {item.status}
+                  </Badge>
+                  <div className="flex-col min-w-0">
+                    <p className="text-sm font-semibold text-text-primary truncate">
+                      {item.concept}
+                    </p>
+                    <p className="text-[11px] font-medium text-text-muted mt-0.5">
+                      {item.subject}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-border-subtle">
-                    <Clock className="w-3 h-3 text-text-muted" />
-                    <span className="text-[11px] font-semibold text-text-secondary">
-                      {item.time}
-                    </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-brand-primary transition-colors flex-shrink-0" />
                 </div>
               </Link>
             ))}
@@ -524,17 +509,17 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="p-5 bg-white border border-border-default shadow-sm rounded-2xl">
+        <Card className="p-5 bg-white border border-border-default rounded-xl">
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="p-1.5 bg-surface-100 rounded-lg text-text-secondary">
+            <div className="w-8 h-8 flex items-center justify-center bg-surface-50 rounded-lg text-text-secondary border border-border-default">
               <Clock className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-text-primary tracking-tight">
+            <div className="flex flex-col">
+              <h3 className="text-[13px] uppercase tracking-widest font-semibold text-text-muted mb-0.5">
                 Recent Activity
               </h3>
-              <p className="text-[11px] font-medium text-text-muted">
-                Your latest actions
+              <p className="text-xl font-display font-medium text-text-primary tracking-tight">
+                Latest actions
               </p>
             </div>
           </div>
@@ -542,26 +527,26 @@ export default function DashboardPage() {
             {displayData.recentActivity.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-3 rounded-xl bg-surface-50 border border-border-subtle/50"
+                className="flex items-center gap-3 p-3 rounded-xl bg-surface-50 border border-border-default"
               >
                 <div
-                  className={`p-1.5 rounded-lg flex-shrink-0 ${item.result === "correct" ? "bg-emerald-50 text-emerald-500 border border-emerald-100" : "bg-red-50 text-red-500 border border-red-100"}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${item.result === "correct" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-red-50 text-red-600 border border-red-100"}`}
                 >
                   {item.result === "correct" ? (
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <CheckCircle2 className="w-4 h-4" />
                   ) : (
-                    <XCircle className="w-3.5 h-3.5" />
+                    <XCircle className="w-4 h-4" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-text-primary truncate">
+                  <p className="text-sm font-semibold text-text-primary truncate">
                     {item.action}
                   </p>
-                  <p className="text-[11px] font-medium text-text-secondary mt-0.5">
+                  <p className="text-[11px] font-medium text-text-muted mt-0.5">
                     {item.topic}
                   </p>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex-shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted flex-shrink-0 pr-1">
                   {item.time}
                 </span>
               </div>
