@@ -7,3 +7,8 @@
 **Vulnerability:** Comparing sensitive strings (like webhook verification tokens) using standard equality operators (`===`) can expose the application to timing attacks. An attacker can infer the token's value or length by measuring the time it takes for the comparison to fail.
 **Learning:** `crypto.timingSafeEqual` should be used for constant-time comparisons. However, it requires both buffers to have the exact same `byteLength`. Simply checking `token.length === SECRET.length` is insufficient because `.length` on a string checks the character count, not the byte length, leading to unhandled `TypeError` exceptions if multi-byte characters are used.
 **Prevention:** To safely use `crypto.timingSafeEqual` with strings of potentially differing lengths, hash both the expected token and the provided token first (e.g., with SHA-256) and compare the resulting fixed-length hashes.
+
+## $(date +%Y-%m-%d) - [Stop leaking internal stack traces / error info]
+**Vulnerability:** Several API endpoints returned the raw `error.message` directly in 500 responses (`{ error: error.message || "Internal Server Error" }`). If an underlying service fails (e.g. database schema mismatch or API key issues), this leaks sensitive internal stack traces or details to the user.
+**Learning:** Returning `error.message` unconditionally in API routes is a security anti-pattern because it violates the "Fail securely" principle.
+**Prevention:** In general fallback `catch` blocks (handling 500 internal server errors), always return a generic error message like `"Internal Server Error"`. Specific handled exceptions (like `FirebaseAuthError` where the message is intended for the client) can still be safely sent.
