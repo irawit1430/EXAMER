@@ -1,0 +1,1 @@
+## 2026-04-12 - Add aria-label to Modal Close Button\n**Learning:** Icon-only buttons often miss accessible labels. The `<Modal>` component in `src/components/ui/Modal.tsx` had an icon-only close button missing an `aria-label`.\n**Action:** Always verify icon-only buttons have an `aria-label` or `aria-labelledby` attribute for screen reader compatibility.
