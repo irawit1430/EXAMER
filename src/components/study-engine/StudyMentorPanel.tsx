@@ -8,6 +8,45 @@ import { Send, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
+// ⚡ Bolt Optimization:
+// Extracted inline message rendering into a memoized ChatMessage component.
+// Why: Prevents unnecessary re-renders of the entire message history
+//      every time a new chunk arrives during streaming, saving CPU cycles.
+const ChatMessage = React.memo(({ msg }: { msg: { role: "mentor" | "user"; text: string; timestamp: number } }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9, y: 10 }}
+    transition={{ type: "spring", stiffness: 300, damping: 24 }}
+    className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+  >
+    <div
+      className={`max-w-[84%] rounded-3xl px-5 py-4 shadow-sm ${
+        msg.role === "user"
+          ? "rounded-tr-[4px] bg-brand-primary text-white text-right"
+          : "rounded-tl-[4px] border border-border-subtle bg-white text-text-primary text-left"
+      }`}
+    >
+      <p
+        className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${msg.role === "user" ? "text-white/70" : "text-text-muted"}`}
+      >
+        {msg.role === "user" ? "You" : "Mentor"}
+      </p>
+      <div className="mt-1 text-[14px] leading-6 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold text-left inline-block">
+        <ReactMarkdown>{msg.text}</ReactMarkdown>
+      </div>
+      <p
+        className={`mt-2 text-[10px] ${msg.role === "user" ? "text-white/60" : "text-text-muted"}`}
+      >
+        {formatMentorTime(msg.timestamp)}
+      </p>
+    </div>
+  </motion.div>
+));
+ChatMessage.displayName = "ChatMessage";
+
+
 function formatMentorTime(timestamp: number): string {
   return new Intl.DateTimeFormat([], {
     hour: "numeric",
@@ -307,37 +346,7 @@ export default function StudyMentorPanel() {
           <div className="space-y-4">
             <AnimatePresence initial={false}>
               {dialogueHistory.map((msg, i) => (
-                <motion.div
-                  key={`${msg.timestamp}-${i}`}
-                  layout
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
-                  className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[84%] rounded-3xl px-5 py-4 shadow-sm ${
-                      msg.role === "user"
-                        ? "rounded-tr-[4px] bg-brand-primary text-white text-right"
-                        : "rounded-tl-[4px] border border-border-subtle bg-white text-text-primary text-left"
-                    }`}
-                  >
-                    <p
-                      className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${msg.role === "user" ? "text-white/70" : "text-text-muted"}`}
-                    >
-                      {msg.role === "user" ? "You" : "Mentor"}
-                    </p>
-                    <div className="mt-1 text-[14px] leading-6 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5 [&>h1]:font-bold [&>h2]:font-semibold [&>h3]:font-medium [&>strong]:font-bold text-left inline-block">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    </div>
-                    <p
-                      className={`mt-2 text-[10px] ${msg.role === "user" ? "text-white/60" : "text-text-muted"}`}
-                    >
-                      {formatMentorTime(msg.timestamp)}
-                    </p>
-                  </div>
-                </motion.div>
+                <ChatMessage key={`${msg.timestamp}-${i}`} msg={msg} />
               ))}
 
               {isStreaming && (
