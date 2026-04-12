@@ -1,14 +1,11 @@
-## ⚡ Optimize Dashboard nested loops using labeled breaks
+## 🎯 What:
+Added comprehensive tests for the `initTracingAsync` function to ensure correct handling of global state, environment variables, and module initialization.
 
-### 💡 What:
-Replaced the step-by-step layer unrolling `break` mechanism in the nested loops traversing `syllabusTree.tree` inside `src/app/(dashboard)/dashboard/page.tsx` with specific **labeled loop breaks** (`planLoop` and `searchLoop`).
+## 📊 Coverage:
+*   Returns early if `globalForTracing.__examerTracingInitialized` is already true.
+*   Returns early if the `OTEL_SDK_DISABLED` environment variable is strictly "true".
+*   Returns early if the `NEXT_RUNTIME` environment variable is set and not "nodejs" (e.g., "edge").
+*   Successfully proceeds to initialize the `@opentelemetry` dependencies when conditions are met (`NEXT_RUNTIME` is "nodejs" or unset). Includes complex dynamic import interception through `Promise.all` wrapping to safely mock missing modules.
 
-### 🎯 Why:
-The previous approach used continuous innermost `break` instructions, leaving the outer loops to execute iterations unnecessarily until bubbling completely up. This became especially pronounced when retrieving specific inner concepts and caused extra processing overhead that scales poorly based on the deepness of the syllabus tree. The new optimized labeled loops allow the process to immediately short-circuit out of all nested tiers simultaneously once the desired items (4 items for `todaysPlan` or a match in `weakTopics`) are found.
-
-### 📊 Measured Improvement:
-Using a simulated deep syllabus tree benchmark on the `weakTopics` extraction with 1000 loop executions:
-- **Baseline execution time:** ~49.52 ms
-- **Optimized execution time:** ~18.99 ms
-- **Improvement:** ~61.6% reduction in loop time, saving **30+ ms** off operations in dashboard loading logic.
-- **Iterations reduced:** Dropped from 1,250,000 baseline iterations to 315,000 optimized iterations for the same work in the benchmark, showing less CPU operations effectively wasted.
+## ✨ Result:
+The improvement increases test coverage of `src/lib/tracing-bootstrap.ts`, resulting in fewer regressions and a stable test suite that does not hang or execute unsupported modules. Tests passed successfully using the built-in Node.js test runner in a clean and safe manner.
