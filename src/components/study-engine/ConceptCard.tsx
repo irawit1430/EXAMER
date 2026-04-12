@@ -45,7 +45,7 @@ export default function ConceptCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <p className="text-base font-bold text-text-primary truncate group-hover:text-brand-primary transition-colors">
+          <p className="content-safe text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
             {name}
           </p>
           <p className="text-sm font-medium text-text-secondary mt-1">

@@ -77,7 +77,7 @@ export default function ActiveRecallBox({
         </div>
 
         {/* Question */}
-        <p className="text-lg font-semibold text-text-primary mb-8 leading-relaxed">
+        <p className="content-safe text-lg font-semibold text-text-primary mb-8 leading-relaxed">
           {question.question}
         </p>
 
@@ -115,7 +115,7 @@ export default function ActiveRecallBox({
                   String.fromCharCode(65 + i)
                 )}
               </span>
-              <span className="text-sm font-medium text-text-secondary">
+              <span className="content-safe text-sm font-medium text-text-secondary">
                 {option.text}
               </span>
             </button>
@@ -128,14 +128,14 @@ export default function ActiveRecallBox({
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
               Explanation
             </p>
-            <p className="text-sm font-medium text-text-secondary leading-relaxed">
+            <p className="content-safe text-sm font-medium text-text-secondary leading-relaxed">
               {question.explanation}
             </p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {!isRevealed ? (
             <Button
               onClick={handleSubmit}

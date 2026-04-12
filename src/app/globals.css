@@ -73,6 +73,10 @@ body {
   letter-spacing: -0.01em;
 }
 
+#__next {
+  min-height: 100dvh;
+}
+
 h1,
 h2,
 h3,
@@ -87,6 +91,37 @@ h6 {
 
 /* ---- Premium Glassmorphism & Depth Utilities ---- */
 @layer utilities {
+  .app-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .app-container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-container {
+      padding-inline: 2rem;
+    }
+  }
+
+  .section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .content-safe {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .glass {
     background: var(--glass-bg);
     backdrop-filter: saturate(180%) blur(var(--glass-blur));

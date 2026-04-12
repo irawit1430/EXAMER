@@ -237,7 +237,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full mx-auto space-y-6 md:space-y-8 animate-fade-in pb-12">
+    <div className="w-full mx-auto section-stack md:gap-8 animate-fade-in pb-12">
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 pb-5 border-b border-border-subtle">
         <div className="space-y-2">
@@ -327,7 +327,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Stats Grid */}
-        <div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="xl:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card
             hover
             className="flex flex-col justify-between p-4 bg-white border border-border-default shadow-sm rounded-xl"

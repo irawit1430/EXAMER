@@ -11,26 +11,29 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-surface overflow-hidden text-text-primary">
+    <div className="flex min-h-[100dvh] bg-surface text-text-primary">
       <Sidebar
         collapsed={sidebarCollapsed}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
         onToggle={() => setSidebarCollapsed((value) => !value)}
       />
       <div
-        className={`flex-1 flex flex-col h-screen transition-[margin-left] duration-300 relative ${
-          sidebarCollapsed ? "ml-[64px]" : "ml-[240px]"
+        className={`flex min-h-[100dvh] min-w-0 flex-1 flex-col transition-[margin-left] duration-300 relative ${
+          sidebarCollapsed ? "lg:ml-[64px]" : "lg:ml-[240px]"
         }`}
       >
-        <Navbar />
-        <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 overflow-y-auto relative z-0">
+        <Navbar onOpenMobileMenu={() => setMobileSidebarOpen(true)} />
+        <main className="flex-1 min-w-0 w-full app-container py-6 md:py-8 relative z-0">
           {children}
         </main>
         
         {/* Floating AI Agent anchored to the viewport so it never scrolls out of view */}
         <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none px-3 sm:px-4 md:px-6 lg:px-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          <div className="w-full max-w-[1440px] mx-auto flex justify-end">
+          <div className="w-full max-w-[1200px] mx-auto flex justify-end">
             <div className="pointer-events-auto">
               <GlobalMentor />
             </div>

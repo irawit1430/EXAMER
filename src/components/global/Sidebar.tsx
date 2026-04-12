@@ -24,10 +24,17 @@ const navItems = [
 
 type SidebarProps = {
   collapsed: boolean;
+  mobileOpen?: boolean;
   onToggle: () => void;
+  onCloseMobile?: () => void;
 };
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({
+  collapsed,
+  mobileOpen = false,
+  onToggle,
+  onCloseMobile,
+}: SidebarProps) {
   const pathname = usePathname();
 
   const isItemActive = (href: string) => {
@@ -39,11 +46,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   return (
-    <aside
-      className={`fixed left-0 top-0 h-screen z-40 flex flex-col transition-all duration-200 ease-out
-        ${collapsed ? "w-[64px]" : "w-[240px]"}
-        bg-white border-r border-border-default`}
-    >
+    <>
+      <div
+        className={`fixed inset-0 z-30 bg-black/30 backdrop-blur-[1px] transition-opacity lg:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={onCloseMobile}
+      />
+      <aside
+        className={`fixed left-0 top-0 z-40 flex h-[100dvh] flex-col bg-white border-r border-border-default transition-all duration-200 ease-out
+        ${collapsed ? "lg:w-[64px]" : "lg:w-[240px]"}
+        w-[240px] lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+      >
       {/* Logo */}
       <div
         className={`flex items-center gap-2.5 py-4 border-b border-border-default transition-all ${collapsed ? "px-3 justify-center" : "px-5"}`}
@@ -74,6 +86,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onCloseMobile}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium
                 transition-all duration-150 group relative
                 ${
@@ -116,7 +129,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         type="button"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         onClick={onToggle}
-        className="flex items-center justify-center py-3 border-t border-border-default
+        className="hidden lg:flex items-center justify-center py-3 border-t border-border-default
           text-text-muted hover:text-text-primary hover:bg-surface-50 transition-colors"
       >
         {collapsed ? (
@@ -126,5 +139,6 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </button>
     </aside>
+    </>
   );
 }

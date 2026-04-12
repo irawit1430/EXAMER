@@ -214,7 +214,7 @@ export default function AnalyticsPage() {
   const subjects = displayData.subjectBreakdown;
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-5 animate-fade-in pb-8">
+    <div className="w-full section-stack animate-fade-in pb-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-3 border-b border-border-default">
         <div className="space-y-1.5">

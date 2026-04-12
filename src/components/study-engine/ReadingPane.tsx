@@ -56,10 +56,10 @@ export default function ReadingPane({
 
       {/* Content */}
       <div className="bg-surface-50 border border-border-subtle shadow-sm rounded-[24px] p-6 md:p-8">
-        <h2 className="text-2xl font-display font-bold text-text-primary mb-5 border-b border-border-subtle/50 pb-4">
+        <h2 className="content-safe text-2xl font-display font-bold text-text-primary mb-5 border-b border-border-subtle/50 pb-4">
           {title}
         </h2>
-        <div className="prose prose-sm max-w-none text-text-secondary">
+        <div className="prose prose-sm max-w-none text-text-secondary content-safe">
           <ReactMarkdown
             components={{
               h1: ({ node, ...props }) => (

@@ -751,9 +751,9 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="grid lg:grid-cols-[1fr_400px] gap-8 max-w-screen-2xl mx-auto h-[calc(100vh-6rem)] animate-fade-in relative items-start">
+    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 xl:gap-8 w-full animate-fade-in relative items-start">
       {/* Left Column: Study Engine Interface */}
-      <div className="w-full h-full overflow-y-auto scrollbar-hide pb-20 pr-1">
+      <div className="w-full min-w-0 pb-20">
         {/* Phase: Select Concept */}
         {phase === "select" && (
           <div className="space-y-6">
@@ -908,7 +908,7 @@ export default function StudyPage() {
       </div>
 
       {/* Right Column: Embedded AI Mentor */}
-      <div className="hidden lg:block h-full w-full sticky top-0 pb-6 rounded-[24px]">
+      <div className="hidden xl:block w-full sticky top-20 self-start max-h-[calc(100dvh-7rem)] overflow-y-auto pb-6 rounded-[24px]">
         <StudyMentorPanel />
       </div>
     </div>

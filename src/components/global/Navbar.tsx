@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Bell, Search, Flame, User } from "lucide-react";
+import { Bell, Search, Flame, User, Menu } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
 
-export default function Navbar() {
+type NavbarProps = {
+  onOpenMobileMenu?: () => void;
+};
+
+export default function Navbar({ onOpenMobileMenu }: NavbarProps) {
   const profile = useAuthStore((s) => s.profile);
   const [searchShortcut, setSearchShortcut] = useState("Ctrl+K");
 
@@ -60,9 +64,17 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-6 border-b border-border-default bg-white/90 backdrop-blur-xl transition-all duration-200">
+    <header className="sticky top-0 z-30 h-14 flex items-center justify-between gap-2 px-4 sm:px-6 border-b border-border-default bg-white/90 backdrop-blur-xl transition-all duration-200">
+      <button
+        type="button"
+        aria-label="Open menu"
+        onClick={onOpenMobileMenu}
+        className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-subtle text-text-secondary hover:text-text-primary hover:bg-surface-50"
+      >
+        <Menu className="w-4 h-4" />
+      </button>
       {/* Search */}
-      <div className="flex items-center gap-3 flex-1 max-w-sm">
+      <div className="hidden sm:flex items-center gap-3 flex-1 max-w-sm">
         <div className="relative flex-1 group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted transition-colors group-focus-within:text-brand-primary" />
           <input
@@ -81,9 +93,9 @@ export default function Navbar() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Streak */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-50 border border-border-subtle hover:bg-surface-100 transition-all cursor-pointer">
+        <div className="hidden md:flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg bg-surface-50 border border-border-subtle hover:bg-surface-100 transition-all cursor-pointer">
           <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500/20" />
           <span className="text-[13px] font-bold text-orange-500">
             Day {currentStreak}

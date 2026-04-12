@@ -47,7 +47,7 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -56,7 +56,7 @@ export default function Modal({
 
       {/* Modal */}
       <div
-        className={`glass-card relative p-6 w-full animate-slide-up ${sizeStyles[size]} ${className}`}
+        className={`glass-card relative p-6 w-full max-h-[calc(100dvh-2rem)] overflow-y-auto animate-slide-up ${sizeStyles[size]} ${className}`}
       >
         {/* Header */}
         {title && (
