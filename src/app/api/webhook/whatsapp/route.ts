@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUserByWhatsappNumber } from "@/lib/firebase/firestore-admin";
+import { processStreamingChat } from "@/lib/agent";
+import { AgentContext } from "@/lib/agent/types";
 
-export const runtime = "edge";
+
+export const runtime = "nodejs";
 
 // Secret token for verifying WhatsApp webhook requests (e.g., from Twilio or Meta Graph API)
 const WHATSAPP_VERIFY_TOKEN =
@@ -53,10 +57,87 @@ export async function POST(req: NextRequest) {
 
         console.log(`Received message from ${from}: ${msgBody}`);
 
-        // TODO: In Phase 10 (Cloud Functions), we will trigger a background job to:
         // 1. Look up user by phone number
-        // 2. Pass message to Gemini AI Mentor
-        // 3. Send WhatsApp reply via Meta Graph API
+        // Ensure it has a leading '+' or format appropriately depending on your DB contents
+        const user = await getUserByWhatsappNumber(from);
+
+        if (user) {
+          // 2. Pass message to Gemini AI Mentor
+          const context: AgentContext = {
+            currentTopic: "General Inquiry",
+            currentSubject: "General",
+            timeSpent: "0 minutes",
+            recentErrors: 0,
+            streak: user.streak?.current || 0,
+            predictedScore: user.predictedScore || 0,
+            targetScore: user.targetScore || 0,
+            daysToExam: user.examDate ? Math.max(0, Math.ceil((new Date(user.examDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0,
+            weaknesses: [],
+            prepLevel: user.prepLevel || "Unknown",
+            favoriteSubject: user.favoriteSubject || "None",
+            importantMemories: []
+          };
+
+          const sessionId = "whatsapp_" + user.uid;
+
+          try {
+             const stream = await processStreamingChat(
+               sessionId,
+               user.uid,
+               msgBody,
+               context,
+               "manual"
+             );
+
+             // Gather the response from stream
+             const reader = stream.getReader();
+             const decoder = new TextDecoder();
+             let aiResponse = "";
+             while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                   if (line.startsWith('data: ')) {
+                       const data = line.slice(6);
+                       if (data === '[DONE]') continue;
+                       try {
+                           const parsed = JSON.parse(data);
+                           if (parsed.type === 'message' && parsed.content) {
+                               aiResponse += parsed.content;
+                           }
+                       } catch(e) {}
+                   }
+                }
+             }
+
+             // 3. Send WhatsApp reply via Meta Graph API
+             if (aiResponse) {
+                const META_TOKEN = process.env.WHATSAPP_BUSINESS_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN;
+                if (META_TOKEN) {
+                    await fetch(`https://graph.facebook.com/v17.0/${phoneNumberId}/messages`, {
+                        method: 'POST',
+                        headers: {
+                           'Authorization': `Bearer ${META_TOKEN}`,
+                           'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            messaging_product: "whatsapp",
+                            to: from,
+                            type: "text",
+                            text: { body: aiResponse }
+                        })
+                    });
+                }
+             }
+          } catch(e) {
+             console.error("AI or Meta Graph Error:", e);
+          }
+        } else {
+            console.log(`No user found with whatsappNumber: ${from}`);
+        }
 
         return new NextResponse("EVENT_RECEIVED", { status: 200 });
       }

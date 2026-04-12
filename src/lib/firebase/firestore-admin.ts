@@ -7,6 +7,7 @@ import {
   Timestamp,
 } from "firebase-admin/firestore";
 import { getAdminDb } from "./admin";
+import { UserProfile } from "@/types";
 import type {
   ConceptStatus,
   MentorMemory,
@@ -468,4 +469,18 @@ export async function getRecentActivity(
       time: getTimeAgo(s.startTime),
     };
   });
+}
+
+export async function getUserByWhatsappNumber(
+  whatsappNumber: string,
+): Promise<UserProfile | null> {
+  const adminDb = getAdminDb();
+  const usersRef = adminDb.collection("users");
+  const q = usersRef.where("whatsappNumber", "==", whatsappNumber).limit(1);
+  const snapshot = await q.get();
+
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return { uid: doc.id, ...doc.data() } as UserProfile;
 }
