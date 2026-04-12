@@ -103,12 +103,23 @@ export default function AnalyticsPage() {
               subject.id ||
               subject.name?.toLowerCase().replace(/\s+/g, "-") ||
               "unknown";
+
             let totalConcepts = 0;
-            for (const topic of subject.topics || []) {
-              for (const subTopic of topic.subTopics || []) {
-                totalConcepts += (subTopic.microConcepts || []).length;
+            const topics = subject.topics;
+            if (topics) {
+              for (let i = 0, len = topics.length; i < len; i++) {
+                const subTopics = topics[i].subTopics;
+                if (subTopics) {
+                  for (let j = 0, subLen = subTopics.length; j < subLen; j++) {
+                    const microConcepts = subTopics[j].microConcepts;
+                    if (microConcepts) {
+                      totalConcepts += microConcepts.length;
+                    }
+                  }
+                }
               }
             }
+
             subjectMap[subjectId] = {
               name: subject.name,
               correct: 0,

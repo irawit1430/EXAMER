@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 import { waitUntil } from "@vercel/functions";
 import { getUserByWhatsAppNumber } from "@/lib/firebase/firestore-admin";
@@ -25,9 +26,16 @@ export async function GET(req: NextRequest) {
   const challenge = url.searchParams.get("hub.challenge");
 
   if (mode && token) {
-    if (mode === "subscribe" && token === WHATSAPP_VERIFY_TOKEN) {
-      // Return the challenge as plain text to pass verification
-      return new NextResponse(challenge, { status: 200 });
+    if (mode === "subscribe") {
+      const tokenHash = crypto.createHash('sha256').update(token).digest();
+      const verifyTokenHash = crypto.createHash('sha256').update(WHATSAPP_VERIFY_TOKEN).digest();
+
+      if (crypto.timingSafeEqual(tokenHash, verifyTokenHash)) {
+        // Return the challenge as plain text to pass verification
+        return new NextResponse(challenge, { status: 200 });
+      } else {
+        return new NextResponse("Forbidden", { status: 403 });
+      }
     } else {
       return new NextResponse("Forbidden", { status: 403 });
     }
