@@ -23,12 +23,7 @@ import {
   createStudySession,
   endStudySession,
 } from "@/lib/firebase/firestore";
-import {
-  BookOpen,
-  ArrowRight,
-  Trophy,
-  Loader2,
-} from "lucide-react";
+import { BookOpen, ArrowRight, Trophy, Loader2 } from "lucide-react";
 import type {
   QuizQuestion,
   MicroConcept,
@@ -131,14 +126,18 @@ export default function StudyPage() {
   );
   const [timer, setTimer] = useState(0);
   const [isBlurring, setIsBlurring] = useState(false);
-  const [feynmanEval, setFeynmanEval] = useState<FeynmanEvaluation | null>(null);
+  const [feynmanEval, setFeynmanEval] = useState<FeynmanEvaluation | null>(
+    null,
+  );
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [score, setScore] = useState({ correct: 0, incorrect: 0, total: 0 });
   const [concepts, setConcepts] = useState<ConceptItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(
+    null,
+  );
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
 
   const { user, syllabusTree } = useAuthStore();
@@ -153,7 +152,7 @@ export default function StudyPage() {
     conceptId: string | null;
   }>({ id: null, uid: null, conceptId: null });
 
-  // Sync refs when they change
+  // Track active session ...
   useEffect(() => {
     activeSessionRef.current = {
       id: currentSessionId,
@@ -162,12 +161,47 @@ export default function StudyPage() {
     };
   }, [currentSessionId, user, selectedConcept]);
 
+  const flatSyllabus = useMemo(() => {
+    if (!syllabusTree || !syllabusTree.tree || syllabusTree.tree.length === 0) {
+      return [];
+    }
+    const flat = [];
+    for (const subject of syllabusTree.tree) {
+      const subjName = subject.subjectName || subject.name || "Unknown Subject";
+      const subjectId =
+        subject.id || subjName.toLowerCase().replace(/\s+/g, "-") || "unknown";
+      for (const topic of subject.topics || []) {
+        const topicId =
+          topic.id ||
+          topic.name?.toLowerCase().replace(/\s+/g, "-") ||
+          "unknown";
+        for (const subTopic of topic.subTopics || []) {
+          for (const mc of subTopic.microConcepts || []) {
+            const conceptId =
+              mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-") || "unknown";
+            flat.push({
+              conceptId,
+              mc,
+              subjName,
+              subjectId,
+              topicId,
+              subjectName: subject.name,
+              topicName: topic.name,
+              subTopicName: subTopic.name,
+            });
+          }
+        }
+      }
+    }
+    return flat;
+  }, [syllabusTree]);
+
   // Cleanup on unmount or tab close
   useEffect(() => {
     const handleBeforeUnload = () => {
       const active = activeSessionRef.current;
       if (active.id && active.uid) {
-        // We use a beacon or direct firestore fetch if possible. 
+        // We use a beacon or direct firestore fetch if possible.
         // In client-side firebase, just calling the update is usually enough for SPA changes
         // but for tab closes, it's best-effort.
         const metrics = useMetricsStore.getState();
@@ -210,57 +244,34 @@ export default function StudyPage() {
       }
 
       // If syllabus tree exists, build concept list from it
-      if (syllabusTree && syllabusTree.tree && syllabusTree.tree.length > 0) {
-        const items: ConceptItem[] = [];
+      if (flatSyllabus.length > 0) {
+        const items: ConceptItem[] = flatSyllabus.map((flat) => {
+          const progress = progressMap[flat.conceptId];
 
-        for (const subject of syllabusTree.tree) {
-          const subjName =
-            subject.subjectName || subject.name || "Unknown Subject";
-          const subjectId =
-            subject.id ||
-            subjName.toLowerCase().replace(/\s+/g, "-") ||
-            "unknown";
-          for (const topic of subject.topics || []) {
-            const topicId =
-              topic.id ||
-              topic.name?.toLowerCase().replace(/\s+/g, "-") ||
-              "unknown";
-            for (const subTopic of topic.subTopics || []) {
-              for (const mc of subTopic.microConcepts || []) {
-                const conceptId =
-                  mc.id ||
-                  mc.name?.toLowerCase().replace(/\s+/g, "-") ||
-                  "unknown";
-                const progress = progressMap[conceptId];
-
-                items.push({
-                  concept: {
-                    id: conceptId,
-                    name: mc.name,
-                    content:
-                      progress?.cachedContent ||
-                      mc.content ||
-                      `Study material for: ${mc.name}\n\nThis concept is part of ${subTopic.name} under ${topic.name} in ${subject.name}.`,
-                    difficulty: mc.difficulty || 2,
-                  },
-                  subject: subjName,
-                  subjectId,
-                  topicId,
-                  status: progress?.status || "new",
-                  mastery: progress
-                    ? progress.totalAttempts > 0
-                      ? Math.round(
-                          (progress.correctCount / progress.totalAttempts) *
-                            100,
-                        )
-                      : 0
-                    : 0,
-                  mistakes: progress?.mistakeCount || 0,
-                });
-              }
-            }
-          }
-        }
+          return {
+            concept: {
+              id: flat.conceptId,
+              name: flat.mc.name,
+              content:
+                progress?.cachedContent ||
+                flat.mc.content ||
+                `Study material for: ${flat.mc.name}\n\nThis concept is part of ${flat.subTopicName} under ${flat.topicName} in ${flat.subjectName}.`,
+              difficulty: flat.mc.difficulty || 2,
+            },
+            subject: flat.subjName,
+            subjectId: flat.subjectId,
+            topicId: flat.topicId,
+            status: progress?.status || "new",
+            mastery: progress
+              ? progress.totalAttempts > 0
+                ? Math.round(
+                    (progress.correctCount / progress.totalAttempts) * 100,
+                  )
+                : 0
+              : 0,
+            mistakes: progress?.mistakeCount || 0,
+          };
+        });
 
         if (items.length > 0) {
           // Sort: new → learning → review → mastered
@@ -304,14 +315,14 @@ export default function StudyPage() {
     }
 
     loadConcepts();
-  }, [user, syllabusTree]);
+  }, [user, syllabusTree, flatSyllabus]);
 
   // Add this right before your timer useEffects
   const dynamicReadingTime = useMemo(() => {
     if (!selectedConcept?.concept.content) return 150; // Fallback
     const wordCount = selectedConcept.concept.content.split(/\s+/).length;
     // Calculate seconds: (words / 200 wpm) * 60, minimum 45 seconds
-    return Math.max(45, Math.ceil((wordCount / 200) * 60)); 
+    return Math.max(45, Math.ceil((wordCount / 200) * 60));
   }, [selectedConcept?.concept.content]);
 
   // Timer effect
@@ -347,7 +358,7 @@ export default function StudyPage() {
       item.concept.content === "";
     if (!isDefaultContent && item.concept.content.length > 50) {
       setSelectedConcept(item);
-      
+
       // Still need to generate the question
       setIsGeneratingQuestion(true);
       setCurrentQuestion(null);
@@ -357,7 +368,7 @@ export default function StudyPage() {
         body: JSON.stringify({
           concept: item.concept.name,
           subject: item.subject,
-          conceptId: item.concept.id
+          conceptId: item.concept.id,
         }),
       })
         .then((res) => res.json())
@@ -367,11 +378,7 @@ export default function StudyPage() {
         .catch((err) => console.error("Error generating question", err))
         .finally(() => setIsGeneratingQuestion(false));
 
-      startStudySession(
-        item.concept as MicroConcept,
-        item.subject,
-        "unknown",
-      );
+      startStudySession(item.concept as MicroConcept, item.subject, "unknown");
 
       if (user) {
         try {
@@ -421,9 +428,9 @@ export default function StudyPage() {
           body: JSON.stringify({
             concept: item.concept.name,
             subject: item.subject,
-            conceptId: item.concept.id
+            conceptId: item.concept.id,
           }),
-        }).catch(() => null)
+        }).catch(() => null),
       ]);
 
       if (!response.ok) {
@@ -431,7 +438,7 @@ export default function StudyPage() {
       }
 
       const data = await response.json();
-      
+
       if (questionResponse?.ok) {
         const questionData = await questionResponse.json();
         if (questionData.question) setCurrentQuestion(questionData.question);
@@ -605,7 +612,7 @@ export default function StudyPage() {
             importantMemories: [],
           };
 
-                    useMentorStore.getState().startStreamingMentor("errors");
+          useMentorStore.getState().startStreamingMentor("errors");
 
           const userId = user.uid;
           const idToken = await user.getIdToken();
@@ -653,7 +660,9 @@ export default function StudyPage() {
                   } else if (data.text) {
                     useMentorStore.getState().appendStreamChunk(data.text);
                   }
-                } catch { /* ignore parse error */ }
+                } catch {
+                  /* ignore parse error */
+                }
               }
             }
           }

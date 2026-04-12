@@ -1,3 +1,4 @@
-## 2024-04-10 - [Zustand Store Re-render Optimization]
-**Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. If any property in the store changes (like a timer ticking every second), the component using the hook re-renders completely. This happens even if the component only needed an action function (e.g., `startStudySession`).
-**Action:** Always use shallow selectors or destructure specific properties when consuming Zustand stores, especially if the store contains frequently updating state. For example: `const { startStudySession } = useStudyStore();`.
+# Performance Learnings
+
+- When modifying React components, extracting invariant heavy data transformations to `useMemo` hooks significantly improves component update performance compared to re-evaluating deep nested loops on every re-render (e.g., when mapping static `syllabusTree` items).
+- Flattening nested tree structures (`O(N)`) once and caching the result reduces the operational complexity in subsequent passes, especially when mapping external dynamic state (like progress updates) against the tree items.
