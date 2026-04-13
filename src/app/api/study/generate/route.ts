@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
-import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
+import {
+  getVerifiedUidFromRequest,
+  FirebaseAuthError,
+} from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
 
@@ -46,11 +49,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ content: generatedContent });
   } catch (error: any) {
     if (error instanceof FirebaseAuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
     console.error("Study Content Generation API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate study content" },
+      { error: "Failed to generate study content" },
       { status: 500 },
     );
   }
