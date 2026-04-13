@@ -1,0 +1,3 @@
+## 2024-05-13 - Missing ARIA Labels on Icon-Only Buttons and Expandable State Attributes
+**Learning:** Found several generic UI elements like `Modal` and `Sidebar` that use icon-only close buttons lacking `aria-label`s, rendering them inaccessible to screen readers. Also, dynamic expandable components like `Concept Explanation` and `Feedback` blocks in the `MentorMessage` were missing `aria-expanded` attributes, making it impossible for screen readers to convey their open/closed state.
+**Action:** Always ensure icon-only buttons have descriptive `aria-label`s and interactive expanding components have proper `aria-expanded` attributes bound to their state variables.
