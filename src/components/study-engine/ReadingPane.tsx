@@ -13,6 +13,53 @@ interface ReadingPaneProps {
   isBlurring: boolean; // triggers blur-out animation
 }
 
+// ⚡ Bolt: Extracted markdown components outside the render cycle
+// Recreating this object and its inline functions on every render (which happens
+// frequently due to timeElapsed updates) causes React to unmount and remount
+// the entire Markdown DOM tree, leading to severe performance bottlenecks.
+const markdownComponents = {
+  h1: ({ node, ...props }: any) => (
+    <h1
+      className="text-2xl font-bold text-text-primary mt-8 mb-4 border-b border-border-subtle/50 pb-2"
+      {...props}
+    />
+  ),
+  h2: ({ node, ...props }: any) => (
+    <h2 className="text-xl font-bold text-text-primary mt-8 mb-4" {...props} />
+  ),
+  h3: ({ node, ...props }: any) => (
+    <h3
+      className="text-lg font-semibold text-text-primary mt-6 mb-3"
+      {...props}
+    />
+  ),
+  p: ({ node, ...props }: any) => (
+    <p className="mb-4 leading-relaxed text-text-secondary" {...props} />
+  ),
+  ul: ({ node, ...props }: any) => (
+    <ul
+      className="list-disc pl-5 mb-4 space-y-2 text-text-secondary marker:text-brand-primary"
+      {...props}
+    />
+  ),
+  ol: ({ node, ...props }: any) => (
+    <ol
+      className="list-decimal pl-5 mb-4 space-y-2 text-text-secondary marker:text-brand-primary"
+      {...props}
+    />
+  ),
+  li: ({ node, ...props }: any) => <li className="pl-1" {...props} />,
+  strong: ({ node, ...props }: any) => (
+    <strong className="font-bold text-text-primary" {...props} />
+  ),
+  blockquote: ({ node, ...props }: any) => (
+    <blockquote
+      className="border-l-4 border-accent-cyan/50 pl-4 py-1 my-4 italic bg-surface-100/50 rounded-r-lg"
+      {...props}
+    />
+  ),
+};
+
 export default function ReadingPane({
   content,
   title,
@@ -60,56 +107,7 @@ export default function ReadingPane({
           {title}
         </h2>
         <div className="prose prose-sm max-w-none text-text-secondary">
-          <ReactMarkdown
-            components={{
-              h1: ({ node, ...props }) => (
-                <h1
-                  className="text-2xl font-bold text-text-primary mt-8 mb-4 border-b border-border-subtle/50 pb-2"
-                  {...props}
-                />
-              ),
-              h2: ({ node, ...props }) => (
-                <h2
-                  className="text-xl font-bold text-text-primary mt-8 mb-4"
-                  {...props}
-                />
-              ),
-              h3: ({ node, ...props }) => (
-                <h3
-                  className="text-lg font-semibold text-text-primary mt-6 mb-3"
-                  {...props}
-                />
-              ),
-              p: ({ node, ...props }) => (
-                <p
-                  className="mb-4 leading-relaxed text-text-secondary"
-                  {...props}
-                />
-              ),
-              ul: ({ node, ...props }) => (
-                <ul
-                  className="list-disc pl-5 mb-4 space-y-2 text-text-secondary marker:text-brand-primary"
-                  {...props}
-                />
-              ),
-              ol: ({ node, ...props }) => (
-                <ol
-                  className="list-decimal pl-5 mb-4 space-y-2 text-text-secondary marker:text-brand-primary"
-                  {...props}
-                />
-              ),
-              li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-              strong: ({ node, ...props }) => (
-                <strong className="font-bold text-text-primary" {...props} />
-              ),
-              blockquote: ({ node, ...props }) => (
-                <blockquote
-                  className="border-l-4 border-accent-cyan/50 pl-4 py-1 my-4 italic bg-surface-100/50 rounded-r-lg"
-                  {...props}
-                />
-              ),
-            }}
-          >
+          <ReactMarkdown components={markdownComponents}>
             {content}
           </ReactMarkdown>
         </div>
