@@ -6,7 +6,6 @@ import { getUserByWhatsAppNumber } from "@/lib/firebase/firestore-admin";
 import { buildMentorPrompt, streamMentorResponse } from "@/lib/gemini/client";
 import { AIContextPayload } from "@/types";
 
-
 /**
  * GET requests are typically used by WhatsApp/Meta to verify the webhook URL.
  */
@@ -27,8 +26,11 @@ export async function GET(req: NextRequest) {
 
   if (mode && token) {
     if (mode === "subscribe") {
-      const tokenHash = crypto.createHash('sha256').update(token).digest();
-      const verifyTokenHash = crypto.createHash('sha256').update(WHATSAPP_VERIFY_TOKEN).digest();
+      const tokenHash = crypto.createHash("sha256").update(token).digest();
+      const verifyTokenHash = crypto
+        .createHash("sha256")
+        .update(WHATSAPP_VERIFY_TOKEN)
+        .digest();
 
       if (crypto.timingSafeEqual(tokenHash, verifyTokenHash)) {
         // Return the challenge as plain text to pass verification
