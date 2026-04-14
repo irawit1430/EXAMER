@@ -37,7 +37,14 @@ interface MentorMessageProps {
 // --- Pattern Detection ---
 
 interface ParsedBlock {
-  type: "text" | "concept" | "mcq" | "feedback_correct" | "feedback_wrong" | "keypoint" | "action_link";
+  type:
+    | "text"
+    | "concept"
+    | "mcq"
+    | "feedback_correct"
+    | "feedback_wrong"
+    | "keypoint"
+    | "action_link";
   content: string;
   meta?: Record<string, string>;
 }
@@ -49,7 +56,10 @@ interface ParsedBlock {
 function parseBlocks(text: string): ParsedBlock[] {
   const blocks: ParsedBlock[] = [];
   // Ensure action links are isolated on their own lines for parsing
-  const textWithIsolatedLinks = text.replace(/(\/mocks\/[a-zA-Z0-9\-_=?&%.$]+)/g, "\n\n$1\n\n");
+  const textWithIsolatedLinks = text.replace(
+    /(\/mocks\/[a-zA-Z0-9\-_=?&%.$]+)/g,
+    "\n\n$1\n\n",
+  );
   const lines = textWithIsolatedLinks.split("\n");
   let buffer: string[] = [];
   let i = 0;
@@ -66,7 +76,9 @@ function parseBlocks(text: string): ParsedBlock[] {
     const line = lines[i];
 
     // Detect MCQ pattern: "**Q1.** ..." or "**Question 1:**"
-    const mcqMatch = line.match(/^\*\*(?:Q\d+[.:]?|Question\s*\d*[.:]?)\*\*\s*(.*)/i);
+    const mcqMatch = line.match(
+      /^\*\*(?:Q\d+[.:]?|Question\s*\d*[.:]?)\*\*\s*(.*)/i,
+    );
     if (mcqMatch) {
       flushBuffer();
       const questionLines: string[] = [mcqMatch[1] || ""];
@@ -92,13 +104,19 @@ function parseBlocks(text: string): ParsedBlock[] {
     }
 
     // Detect concept header: "## Concept:" or "### Key Concept" or "**Concept:**"
-    const conceptMatch = line.match(/^(?:#{2,3}\s+|)\*\*(?:Concept|Key Concept|Topic|Definition)[:\s]*\*\*\s*(.*)/i);
+    const conceptMatch = line.match(
+      /^(?:#{2,3}\s+|)\*\*(?:Concept|Key Concept|Topic|Definition)[:\s]*\*\*\s*(.*)/i,
+    );
     if (conceptMatch) {
       flushBuffer();
       const conceptLines: string[] = [conceptMatch[1] || ""];
       i++;
       // Collect until empty line or next header
-      while (i < lines.length && lines[i].trim() !== "" && !lines[i].match(/^#{1,3}\s/)) {
+      while (
+        i < lines.length &&
+        lines[i].trim() !== "" &&
+        !lines[i].match(/^#{1,3}\s/)
+      ) {
         conceptLines.push(lines[i]);
         i++;
       }
@@ -111,13 +129,21 @@ function parseBlocks(text: string): ParsedBlock[] {
 
     // Detect correct feedback: "✅" or "Correct!" or "That's right"
     const correctMatch = line.match(/^(?:✅|✓|☑️|🎉)\s*(.*)/);
-    const correctTextMatch = !correctMatch && line.match(/^(?:\*\*)?(?:Correct|That's right|Well done|Great job|Excellent|Perfect)[!.]*(?:\*\*)?\s*(.*)/i);
+    const correctTextMatch =
+      !correctMatch &&
+      line.match(
+        /^(?:\*\*)?(?:Correct|That's right|Well done|Great job|Excellent|Perfect)[!.]*(?:\*\*)?\s*(.*)/i,
+      );
     if (correctMatch || correctTextMatch) {
       flushBuffer();
       const match = correctMatch || correctTextMatch;
       const feedbackLines: string[] = [match ? match[1] || "" : ""];
       i++;
-      while (i < lines.length && lines[i].trim() !== "" && !lines[i].match(/^#{1,3}\s/)) {
+      while (
+        i < lines.length &&
+        lines[i].trim() !== "" &&
+        !lines[i].match(/^#{1,3}\s/)
+      ) {
         feedbackLines.push(lines[i]);
         i++;
       }
@@ -130,13 +156,21 @@ function parseBlocks(text: string): ParsedBlock[] {
 
     // Detect wrong feedback: "❌" or "Incorrect" or "Not quite"
     const wrongMatch = line.match(/^(?:❌|✗|🤔)\s*(.*)/);
-    const wrongTextMatch = !wrongMatch && line.match(/^(?:\*\*)?(?:Incorrect|Not quite|That's not|Wrong|Close, but)[!.,]*(?:\*\*)?\s*(.*)/i);
+    const wrongTextMatch =
+      !wrongMatch &&
+      line.match(
+        /^(?:\*\*)?(?:Incorrect|Not quite|That's not|Wrong|Close, but)[!.,]*(?:\*\*)?\s*(.*)/i,
+      );
     if (wrongMatch || wrongTextMatch) {
       flushBuffer();
       const match = wrongMatch || wrongTextMatch;
       const feedbackLines: string[] = [match ? match[1] || "" : ""];
       i++;
-      while (i < lines.length && lines[i].trim() !== "" && !lines[i].match(/^#{1,3}\s/)) {
+      while (
+        i < lines.length &&
+        lines[i].trim() !== "" &&
+        !lines[i].match(/^#{1,3}\s/)
+      ) {
         feedbackLines.push(lines[i]);
         i++;
       }
@@ -147,7 +181,7 @@ function parseBlocks(text: string): ParsedBlock[] {
       continue;
     }
 
-    // Detect standalone action links (e.g., /mocks/...) 
+    // Detect standalone action links (e.g., /mocks/...)
     const actionLinkMatch = line.match(/^\/mocks\/[a-zA-Z0-9\-_=?&%.$]+$/);
     if (actionLinkMatch) {
       flushBuffer();
@@ -172,7 +206,10 @@ function parseBlocks(text: string): ParsedBlock[] {
  * A) First option
  * B) Second option
  */
-function parseMCQOptions(text: string): { question: string; options: { label: string; text: string }[] } {
+function parseMCQOptions(text: string): {
+  question: string;
+  options: { label: string; text: string }[];
+} {
   const lines = text.split("\n");
   const questionParts: string[] = [];
   const options: { label: string; text: string }[] = [];
@@ -180,7 +217,10 @@ function parseMCQOptions(text: string): { question: string; options: { label: st
   for (const line of lines) {
     const optMatch = line.match(/^(?:\*\*)?([A-D])[.)]\*?\*?\s*(.*)/);
     if (optMatch) {
-      options.push({ label: optMatch[1], text: optMatch[2].replace(/\*\*/g, "").trim() });
+      options.push({
+        label: optMatch[1],
+        text: optMatch[2].replace(/\*\*/g, "").trim(),
+      });
     } else if (line.trim()) {
       questionParts.push(line);
     }
@@ -193,7 +233,13 @@ function parseMCQOptions(text: string): { question: string; options: { label: st
 // Sub-Components
 // =============================================
 
-function ActionLinkCard({ url, fullPage }: { url: string; fullPage?: boolean }) {
+function ActionLinkCard({
+  url,
+  fullPage,
+}: {
+  url: string;
+  fullPage?: boolean;
+}) {
   let title = "Launch Mock Test";
   const subtitle = "Your test is ready.";
 
@@ -236,7 +282,13 @@ function ActionLinkCard({ url, fullPage }: { url: string; fullPage?: boolean }) 
   );
 }
 
-function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolean }) {
+function ConceptCard({
+  content,
+  fullPage,
+}: {
+  content: string;
+  fullPage?: boolean;
+}) {
   const [expanded, setExpanded] = useState(true);
   return (
     <motion.div
@@ -246,15 +298,27 @@ function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolea
     >
       <button
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-label={
+          expanded
+            ? "Collapse concept explanation"
+            : "Expand concept explanation"
+        }
         className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-blue-50/50 transition-colors"
       >
         <div className="w-8 h-8 rounded-xl bg-brand-accent/10 flex items-center justify-center flex-shrink-0">
           <BookOpen className="w-4 h-4 text-brand-accent" />
         </div>
-        <span className={`font-semibold text-brand-accent flex-1 ${fullPage ? "text-base" : "text-sm"}`}>
+        <span
+          className={`font-semibold text-brand-accent flex-1 ${fullPage ? "text-base" : "text-sm"}`}
+        >
           Concept Explanation
         </span>
-        {expanded ? <ChevronUp className="w-4 h-4 text-brand-accent/50" /> : <ChevronDown className="w-4 h-4 text-brand-accent/50" />}
+        {expanded ? (
+          <ChevronUp className="w-4 h-4 text-brand-accent/50" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-brand-accent/50" />
+        )}
       </button>
       <AnimatePresence>
         {expanded && (
@@ -265,7 +329,9 @@ function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolea
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className={`px-4 pb-4 leading-relaxed text-text-primary ${fullPage ? "text-[15px]" : "text-[13px]"}`}>
+            <div
+              className={`px-4 pb-4 leading-relaxed text-text-primary ${fullPage ? "text-[15px]" : "text-[13px]"}`}
+            >
               <ReactMarkdown>{content}</ReactMarkdown>
             </div>
           </motion.div>
@@ -302,12 +368,16 @@ function MCQCard({
         <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
           <Lightbulb className="w-4 h-4 text-amber-600" />
         </div>
-        <span className={`font-semibold text-amber-800 ${fullPage ? "text-base" : "text-sm"}`}>
+        <span
+          className={`font-semibold text-amber-800 ${fullPage ? "text-base" : "text-sm"}`}
+        >
           Quick Check
         </span>
       </div>
       <div className="p-4">
-        <p className={`font-medium text-text-primary mb-3 leading-relaxed ${fullPage ? "text-[15px]" : "text-[13px]"}`}>
+        <p
+          className={`font-medium text-text-primary mb-3 leading-relaxed ${fullPage ? "text-[15px]" : "text-[13px]"}`}
+        >
           {question}
         </p>
         <div className="space-y-2">
@@ -316,21 +386,25 @@ function MCQCard({
               key={opt.label}
               onClick={() => handleSelect(opt.label)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150
-                ${selected === opt.label
-                  ? "border-brand-accent/50 bg-brand-accent/5 shadow-sm ring-1 ring-brand-accent/20"
-                  : "border-border-subtle hover:border-amber-300/60 hover:bg-white/60"
+                ${
+                  selected === opt.label
+                    ? "border-brand-accent/50 bg-brand-accent/5 shadow-sm ring-1 ring-brand-accent/20"
+                    : "border-border-subtle hover:border-amber-300/60 hover:bg-white/60"
                 }`}
             >
               <span
                 className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors
-                  ${selected === opt.label
-                    ? "bg-brand-accent text-white"
-                    : "bg-surface-100 text-text-muted"
+                  ${
+                    selected === opt.label
+                      ? "bg-brand-accent text-white"
+                      : "bg-surface-100 text-text-muted"
                   }`}
               >
                 {opt.label}
               </span>
-              <span className={`text-text-primary ${fullPage ? "text-[14px]" : "text-[12px]"}`}>
+              <span
+                className={`text-text-primary ${fullPage ? "text-[14px]" : "text-[12px]"}`}
+              >
                 {opt.text}
               </span>
             </button>
@@ -363,7 +437,8 @@ function FeedbackCard({
 
   // Split content: first line is the main feedback, rest is explanation
   const lines = content.split("\n");
-  const mainFeedback = lines[0] || (correct ? "Great job!" : "Not quite right.");
+  const mainFeedback =
+    lines[0] || (correct ? "Great job!" : "Not quite right.");
   const explanation = lines.slice(1).join("\n").trim();
 
   return (
@@ -396,9 +471,11 @@ function FeedbackCard({
           >
             {correct ? "Correct!" : "Not quite right"}
           </p>
-          <p className={`mt-1 leading-relaxed ${fullPage ? "text-[14px]" : "text-[12px]"} ${
-            correct ? "text-green-700" : "text-red-700"
-          }`}>
+          <p
+            className={`mt-1 leading-relaxed ${fullPage ? "text-[14px]" : "text-[12px]"} ${
+              correct ? "text-green-700" : "text-red-700"
+            }`}
+          >
             {mainFeedback}
           </p>
         </div>
@@ -407,13 +484,16 @@ function FeedbackCard({
         <>
           <button
             onClick={() => setShowExplanation(!showExplanation)}
+            aria-expanded={showExplanation}
             className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors border-t ${
               correct
                 ? "border-green-200/40 text-green-700 hover:bg-green-50/60"
                 : "border-red-200/40 text-red-700 hover:bg-red-50/60"
             }`}
           >
-            <ArrowRight className={`w-3 h-3 transition-transform ${showExplanation ? "rotate-90" : ""}`} />
+            <ArrowRight
+              className={`w-3 h-3 transition-transform ${showExplanation ? "rotate-90" : ""}`}
+            />
             {showExplanation ? "Hide explanation" : "Show explanation"}
           </button>
           <AnimatePresence>
@@ -424,7 +504,9 @@ function FeedbackCard({
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
               >
-                <div className={`px-4 pb-4 ${fullPage ? "text-[14px]" : "text-[12px]"} text-text-secondary leading-relaxed`}>
+                <div
+                  className={`px-4 pb-4 ${fullPage ? "text-[14px]" : "text-[12px]"} text-text-secondary leading-relaxed`}
+                >
                   <ReactMarkdown>{explanation}</ReactMarkdown>
                 </div>
               </motion.div>
@@ -461,10 +543,17 @@ export default function MentorMessage({
               You
             </p>
           )}
-          <p className={`leading-relaxed ${fullPage ? "text-[15px]" : "text-[14px]"}`}>{text}</p>
+          <p
+            className={`leading-relaxed ${fullPage ? "text-[15px]" : "text-[14px]"}`}
+          >
+            {text}
+          </p>
           {timestamp && (
             <p className="mt-2 text-[10px] text-white/50">
-              {new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(timestamp)}
+              {new Intl.DateTimeFormat([], {
+                hour: "numeric",
+                minute: "2-digit",
+              }).format(timestamp)}
             </p>
           )}
         </div>
@@ -473,7 +562,9 @@ export default function MentorMessage({
   }
 
   // --- Mentor message: detect and render rich blocks ---
-  const blocks = isStreaming ? [{ type: "text" as const, content: text }] : parseBlocks(text);
+  const blocks = isStreaming
+    ? [{ type: "text" as const, content: text }]
+    : parseBlocks(text);
 
   return (
     <div className={`flex justify-start ${fullPage ? "mb-6" : "mb-4"}`}>
@@ -494,9 +585,21 @@ export default function MentorMessage({
         {blocks.map((block, idx) => {
           switch (block.type) {
             case "action_link":
-              return <ActionLinkCard key={idx} url={block.content} fullPage={fullPage} />;
+              return (
+                <ActionLinkCard
+                  key={idx}
+                  url={block.content}
+                  fullPage={fullPage}
+                />
+              );
             case "concept":
-              return <ConceptCard key={idx} content={block.content} fullPage={fullPage} />;
+              return (
+                <ConceptCard
+                  key={idx}
+                  content={block.content}
+                  fullPage={fullPage}
+                />
+              );
             case "mcq":
               return (
                 <MCQCard
@@ -507,9 +610,23 @@ export default function MentorMessage({
                 />
               );
             case "feedback_correct":
-              return <FeedbackCard key={idx} content={block.content} correct={true} fullPage={fullPage} />;
+              return (
+                <FeedbackCard
+                  key={idx}
+                  content={block.content}
+                  correct={true}
+                  fullPage={fullPage}
+                />
+              );
             case "feedback_wrong":
-              return <FeedbackCard key={idx} content={block.content} correct={false} fullPage={fullPage} />;
+              return (
+                <FeedbackCard
+                  key={idx}
+                  content={block.content}
+                  correct={false}
+                  fullPage={fullPage}
+                />
+              );
             case "text":
             default:
               return (
@@ -538,7 +655,10 @@ export default function MentorMessage({
 
         {timestamp && !fullPage && (
           <p className="mt-2 text-[10px] text-text-muted">
-            {new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(timestamp)}
+            {new Intl.DateTimeFormat([], {
+              hour: "numeric",
+              minute: "2-digit",
+            }).format(timestamp)}
           </p>
         )}
       </div>

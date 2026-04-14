@@ -30,7 +30,12 @@ type SidebarProps = {
   setMobileOpen?: (open: boolean) => void;
 };
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen }: SidebarProps) {
+export default function Sidebar({
+  collapsed,
+  onToggle,
+  mobileOpen,
+  setMobileOpen,
+}: SidebarProps) {
   const pathname = usePathname();
 
   const isItemActive = (href: string) => {
@@ -85,6 +90,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
           {mobileOpen && (
             <button
               onClick={() => setMobileOpen?.(false)}
+              aria-label="Close sidebar"
               className="absolute right-4 p-1.5 md:hidden text-text-muted hover:text-text-primary hover:bg-surface-100 rounded-lg transition-colors"
             >
               <X className="w-4 h-4" />
@@ -120,7 +126,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
                       : "text-text-muted group-hover:text-text-secondary"
                   }`}
                 />
-                {(!collapsed || mobileOpen) && <span className="leading-none mt-0.5">{item.label}</span>}
+                {(!collapsed || mobileOpen) && (
+                  <span className="leading-none mt-0.5">{item.label}</span>
+                )}
               </Link>
             );
           })}
@@ -137,7 +145,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
             </div>
             <p className="text-xl font-display font-bold text-text-primary tracking-tight">
               5{" "}
-              <span className="text-xs font-semibold text-text-muted">days</span>
+              <span className="text-xs font-semibold text-text-muted">
+                days
+              </span>
             </p>
           </div>
         )}
