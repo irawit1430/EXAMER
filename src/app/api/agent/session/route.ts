@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       }
       console.error("[/api/agent/session] POST Error:", error);
       return NextResponse.json(
-        { error: error.message || "Failed to create session" },
+        { error: "Failed to create session" },
         { status: 500 },
       );
     }
@@ -130,7 +130,7 @@ export async function DELETE(req: NextRequest) {
       }
       console.error("[/api/agent/session] DELETE Error:", error);
       return NextResponse.json(
-        { error: error.message || "Failed to end session" },
+        { error: "Failed to end session" },
         { status: 500 },
       );
     }
@@ -201,7 +201,7 @@ export async function GET(req: NextRequest) {
       }
       console.error("[/api/agent/session] GET Error:", error);
       return NextResponse.json(
-        { error: error.message || "Failed to get session info" },
+        { error: "Failed to get session info" },
         { status: 500 },
       );
     }
