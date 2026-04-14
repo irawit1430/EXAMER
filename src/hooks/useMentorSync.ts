@@ -417,14 +417,14 @@ async function streamMentorResponse(
               // Fallback for older format
               useMentorStore.getState().appendStreamChunk(data.text);
             }
-          } catch (e) {
-            // pass parse errors for split chunks
+          } catch (err) {
+            console.error("[MentorSync] Parse error:", err);
           }
         }
       }
     }
-  } catch {
-    // API not configured or network error — revert streaming state
+  } catch (err) {
+    console.error("[MentorSync] Streaming failed:", err);
     store.finishStreaming();
     return false;
   }
