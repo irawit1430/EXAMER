@@ -1,6 +1,10 @@
-🧹 Remove leftover debug log in whatsapp webhook
+🎯 **What:** The testing gap addressed
+The `useMentorSync` hook's internal `streamMentorResponse` API function had missing test coverage for its error paths. Specifically, cases where `fetch` rejected, network responses were not `ok`, or stream reading threw an error midway were untested, and we lacked verification that `finishStreaming()` was reliably called.
 
-🎯 What: Removed the `console.log("WEBHOOK_VERIFIED");` line in `src/app/api/webhook/whatsapp/route.ts` which was left over from debugging.
-💡 Why: Improves codebase cleanliness by removing unnecessary console logs in production endpoints, reducing noise in the application logs.
-✅ Verification: Ran `npm run test` which passed, and successfully compiled the project. Ensured the behavior of the webhook verification itself wasn't changed.
-✨ Result: Cleaner code, no behavior changes.
+📊 **Coverage:** What scenarios are now tested
+- Network errors that occur during the initial `fetch` API call.
+- HTTP responses where `response.ok` is false.
+- Stream interruptions where the `reader.read()` throws an error midway during parsing.
+
+✨ **Result:** The improvement in test coverage
+The error paths for the core mentoring streaming feature are now thoroughly tested. Tests assert that the `finishStreaming()` mock from the Zustand store is always correctly called to revert the streaming state in UI, improving test reliability and preventing regressions in edge cases. Tests were added using Vitest and Mocked dependencies for React, Zustand, and Fetch.

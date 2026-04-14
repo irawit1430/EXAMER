@@ -354,7 +354,7 @@ export function useMentorSync(config: MentorSyncConfig = {}) {
 }
 
 // ---- Stream AI-generated mentor response via Edge API directly to store ----
-async function streamMentorResponse(
+export async function streamMentorResponse(
   userId: string,
   sessionId: string,
   context: AIContextPayload,
