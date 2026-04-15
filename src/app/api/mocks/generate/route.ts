@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
-import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
+import {
+  getVerifiedUidFromRequest,
+  FirebaseAuthError,
+} from "@/lib/firebase/auth-server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,12 +57,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(mockTests);
   } catch (error: any) {
     if (error instanceof FirebaseAuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
     console.error("Mock Generation Error:", error);
     return NextResponse.json(
       { error: "Failed to generate mock tests" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
