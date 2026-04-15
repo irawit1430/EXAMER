@@ -1,0 +1,9 @@
+⚡ Bolt: Optimize Zustand store subscriptions in study page
+
+💡 What: Implemented `useShallow` from `zustand/react/shallow` and explicit selectors for Zustand stores in `src/app/(dashboard)/study/page.tsx` and `src/hooks/useActiveRecall.ts`.
+
+🎯 Why: Calling a Zustand store without a selector causes the entire component to re-render whenever any property in the store changes. Since `useStudyStore` contains a frequently ticking `timer`, it was causing massive, unnecessary re-renders of the entire Study page, even when the page component only needed static action functions or non-changing state.
+
+📊 Impact: Significantly reduces React re-renders on the main study view. The page component now correctly ignores rapid updates to the background `timer` state, which should drastically improve performance and responsiveness during study sessions.
+
+🔬 Measurement: Verify by interacting with the study flow and observing fewer React dev tools re-render flashes, or simply observing that the application runs much smoother overall.
