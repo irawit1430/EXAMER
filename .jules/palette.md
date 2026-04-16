@@ -1,0 +1,3 @@
+## 2024-04-16 - Accessibility states in custom and icon-only buttons
+**Learning:** Found multiple instances where interactive UI elements (like modal close buttons, sidebar toggles, and base buttons) lacked sufficient keyboard focus states (`focus-visible`) and proper ARIA labels for screen readers when using icon-only designs. Custom UI components in this app often omit default focus indicators.
+**Action:** When building or updating interactive elements, always include `focus-visible` classes (e.g., `focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/20`) and add descriptive `aria-label`s to any buttons that rely solely on icons to communicate their purpose.
