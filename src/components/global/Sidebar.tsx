@@ -30,7 +30,12 @@ type SidebarProps = {
   setMobileOpen?: (open: boolean) => void;
 };
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen }: SidebarProps) {
+export default function Sidebar({
+  collapsed,
+  onToggle,
+  mobileOpen,
+  setMobileOpen,
+}: SidebarProps) {
   const pathname = usePathname();
 
   const isItemActive = (href: string) => {
@@ -85,7 +90,8 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
           {mobileOpen && (
             <button
               onClick={() => setMobileOpen?.(false)}
-              className="absolute right-4 p-1.5 md:hidden text-text-muted hover:text-text-primary hover:bg-surface-100 rounded-lg transition-colors"
+              aria-label="Close sidebar"
+              className="absolute right-4 p-1.5 md:hidden text-text-muted hover:text-text-primary hover:bg-surface-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/20"
             >
               <X className="w-4 h-4" />
             </button>
@@ -120,7 +126,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
                       : "text-text-muted group-hover:text-text-secondary"
                   }`}
                 />
-                {(!collapsed || mobileOpen) && <span className="leading-none mt-0.5">{item.label}</span>}
+                {(!collapsed || mobileOpen) && (
+                  <span className="leading-none mt-0.5">{item.label}</span>
+                )}
               </Link>
             );
           })}
@@ -137,7 +145,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
             </div>
             <p className="text-xl font-display font-bold text-text-primary tracking-tight">
               5{" "}
-              <span className="text-xs font-semibold text-text-muted">days</span>
+              <span className="text-xs font-semibold text-text-muted">
+                days
+              </span>
             </p>
           </div>
         )}
@@ -148,7 +158,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={onToggle}
           className="hidden md:flex items-center justify-center h-12 border-t border-border-default
-            text-text-muted hover:text-text-primary hover:bg-surface-50 transition-colors bg-white w-full"
+            text-text-muted hover:text-text-primary hover:bg-surface-50 transition-colors bg-white w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/20"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
