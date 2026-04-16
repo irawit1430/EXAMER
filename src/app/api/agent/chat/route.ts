@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
       console.error("[/api/agent/chat] Error:", error);
       return new Response(
-        JSON.stringify({ error: error.message || "Internal server error" }),
+        JSON.stringify({ error: "Internal server error" }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
