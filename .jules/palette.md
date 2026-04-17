@@ -1,0 +1,3 @@
+## 2024-05-18 - Ensure accessibility for custom switches
+**Learning:** Custom interactive components like Toggles lack native HTML interactive behaviors. They must be explicitly given a \`role="switch"\`, an \`aria-checked\` state, and an \`aria-label\` for screen readers to properly interpret their state and purpose. Additionally, using Tailwind's \`focus-visible\` ensures they show a focus ring when navigated to via keyboard but not on mouse click, enhancing both accessibility and aesthetics without penalizing mouse users.
+**Action:** When implementing custom interactive controls (like buttons acting as toggles or switches), always include \`role\`, \`aria-label\`, \`aria-checked\` (or \`aria-expanded\`), and keyboard-friendly \`focus-visible\` states.
