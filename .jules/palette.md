@@ -1,0 +1,3 @@
+## 2024-04-18 - Improve Button component keyboard and screen reader accessibility
+**Learning:** Reusable components like the primary Button component lacked critical keyboard navigation feedback (`focus-visible` styles) and screen reader context for loading states (`aria-busy`). Adding these to the foundational level significantly improves global accessibility across the app without breaking design consistency.
+**Action:** Always ensure foundational UI components include appropriate interactive state styling (focus, active, disabled) and ARIA attributes (like `aria-busy` for async actions) when initially implemented to avoid retroactive patches.
