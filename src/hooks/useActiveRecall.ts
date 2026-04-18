@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useStudyStore } from "@/store/useStudyStore";
+import { useShallow } from "zustand/react/shallow";
 
 /**
  * useActiveRecall — Timer hook for the study engine
@@ -11,6 +12,8 @@ import { useStudyStore } from "@/store/useStudyStore";
  */
 export function useActiveRecall() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Performance optimization: Use shallow selector to prevent unnecessary re-renders
+  // when other parts of the study store change
   const {
     timer,
     isReading,
@@ -18,7 +21,16 @@ export function useActiveRecall() {
     readingDuration,
     tickTimer,
     switchToRecall,
-  } = useStudyStore();
+  } = useStudyStore(
+    useShallow((state) => ({
+      timer: state.timer,
+      isReading: state.isReading,
+      isTimerRunning: state.isTimerRunning,
+      readingDuration: state.readingDuration,
+      tickTimer: state.tickTimer,
+      switchToRecall: state.switchToRecall,
+    }))
+  );
 
   useEffect(() => {
     if (!isTimerRunning || !isReading) {

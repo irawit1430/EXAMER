@@ -16,6 +16,7 @@ import { useStudyStore } from "@/store/useStudyStore";
 import { useMetricsStore } from "@/store/useMetricsStore";
 import { useMentorStore } from "@/store/useMentorStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useShallow } from "zustand/react/shallow";
 import {
   saveProgressNode,
   getProgressNode,
@@ -141,10 +142,15 @@ export default function StudyPage() {
   const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null);
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
 
-  const { user, syllabusTree } = useAuthStore();
-  const { triggerMentor } = useMentorStore();
-  const { startQuestion, recordAnswer } = useMetricsStore();
-  const { startStudySession } = useStudyStore(); // Get the study store instance
+  // Performance optimization: Use shallow selectors to prevent unnecessary re-renders
+  const { user, syllabusTree } = useAuthStore(
+    useShallow((state) => ({ user: state.user, syllabusTree: state.syllabusTree }))
+  );
+  const triggerMentor = useMentorStore((state) => state.triggerMentor);
+  const { startQuestion, recordAnswer } = useMetricsStore(
+    useShallow((state) => ({ startQuestion: state.startQuestion, recordAnswer: state.recordAnswer }))
+  );
+  const startStudySession = useStudyStore((state) => state.startStudySession);
 
   // Tracking refs for cleanup
   const activeSessionRef = React.useRef<{
