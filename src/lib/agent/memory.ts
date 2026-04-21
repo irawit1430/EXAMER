@@ -255,8 +255,9 @@ export class LongTermMemoryManager {
   private async ensureDir(): Promise<void> {
     try {
       await fs.mkdir(this.memoryDir, { recursive: true });
-    } catch (error: any) {
-      if (error.code !== "EEXIST") throw error;
+    } catch (error: unknown) {
+      if (error instanceof Error && (error as any).code !== "EEXIST") throw error;
+      else if (!(error instanceof Error)) throw error;
     }
   }
 
@@ -297,8 +298,8 @@ export class LongTermMemoryManager {
 
       this.profileCache.set(userId, profile);
       return profile;
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error: unknown) {
+      if (error instanceof Error && (error as any).code === "ENOENT") {
         // Create default profile then hydrate from Firestore
         console.log(
           `[LTM] No local profile for ${userId} — creating from Firestore...`,
@@ -311,7 +312,7 @@ export class LongTermMemoryManager {
         await this.saveProfile(userId, hydrated);
         return hydrated;
       }
-      throw new Error(`Failed to load profile for ${userId}: ${error.message}`);
+      throw new Error(`Failed to load profile for ${userId}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -425,8 +426,8 @@ export class LongTermMemoryManager {
             err,
           ),
       );
-    } catch (error: any) {
-      throw new Error(`Failed to save profile for ${userId}: ${error.message}`);
+    } catch (error: unknown) {
+      throw new Error(`Failed to save profile for ${userId}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

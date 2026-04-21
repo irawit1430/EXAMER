@@ -1,3 +1,4 @@
 ## 2024-04-10 - [Zustand Store Re-render Optimization]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. If any property in the store changes (like a timer ticking every second), the component using the hook re-renders completely. This happens even if the component only needed an action function (e.g., `startStudySession`).
 **Action:** Always use shallow selectors or destructure specific properties when consuming Zustand stores, especially if the store contains frequently updating state. For example: `const { startStudySession } = useStudyStore();`.
+- For error type narrowing in catch blocks: node's fs module errors can be narrowed using `error instanceof Error` before checking `error.code`. Ensure all instances of `catch(error: any)` are converted to `catch(error: unknown)` for improved type safety.
