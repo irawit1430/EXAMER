@@ -75,13 +75,28 @@ function pickMessage(
 }
 
 // Helper to format date
-function formatDate(d: any): string {
+function formatDate(d: unknown): string {
   if (!d) return "Unknown";
   if (d instanceof Date) return d.toLocaleDateString();
-  if (typeof d?.toDate === "function") return d.toDate().toLocaleDateString();
-  if (typeof d?.seconds === "number")
-    return new Date(d.seconds * 1000).toLocaleDateString();
-  return new Date(d).toLocaleDateString();
+
+  if (typeof d === "object" && d !== null) {
+    const obj = d as Record<string, unknown>;
+    if (typeof obj.toDate === "function") {
+      return (obj as { toDate: () => Date }).toDate().toLocaleDateString();
+    }
+    if (typeof obj.seconds === "number") {
+      return new Date(obj.seconds * 1000).toLocaleDateString();
+    }
+  }
+
+  if (typeof d === "string" || typeof d === "number") {
+    const parsed = new Date(d);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString();
+    }
+  }
+
+  return "Unknown";
 }
 
 function buildContextPayload(
