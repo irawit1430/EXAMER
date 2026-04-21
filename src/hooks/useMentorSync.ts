@@ -145,13 +145,24 @@ export function useMentorSync(config: MentorSyncConfig = {}) {
     const d = profile?.examDate;
     if (!d) return 0;
     let examDate: Date | null = null;
-    if (d instanceof Date) examDate = d;
-    else if (typeof (d as any)?.toDate === "function")
-      examDate = (d as any).toDate();
-    else if (typeof (d as any)?.seconds === "number")
-      examDate = new Date((d as any).seconds * 1000);
-    else {
-      const parsed = new Date(d as any);
+    if (d instanceof Date) {
+      examDate = d;
+    } else if (
+      d !== null &&
+      typeof d === "object" &&
+      "toDate" in d &&
+      typeof (d as Record<string, unknown>).toDate === "function"
+    ) {
+      examDate = (d as { toDate: () => Date }).toDate();
+    } else if (
+      d !== null &&
+      typeof d === "object" &&
+      "seconds" in d &&
+      typeof (d as Record<string, unknown>).seconds === "number"
+    ) {
+      examDate = new Date((d as { seconds: number }).seconds * 1000);
+    } else {
+      const parsed = new Date(d as string | number);
       examDate = isNaN(parsed.getTime()) ? null : parsed;
     }
     if (!examDate) return 0;
