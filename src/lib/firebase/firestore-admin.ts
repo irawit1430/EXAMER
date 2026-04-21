@@ -47,11 +47,18 @@ export interface MockResult {
   completedAt: Date;
 }
 
-function toDate(value: any, fallback = new Date()): Date {
+function toDate(value: unknown, fallback = new Date()): Date {
   if (!value) return fallback;
   if (value instanceof Date) return value;
-  if (typeof value.toDate === "function") return value.toDate();
-  return new Date(value);
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as Record<string, unknown>).toDate === "function"
+  ) {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  return new Date(value as string | number);
 }
 
 function getTimeAgo(date: Date): string {
