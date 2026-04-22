@@ -1,3 +1,6 @@
 ## 2024-04-10 - [Zustand Store Re-render Optimization]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. If any property in the store changes (like a timer ticking every second), the component using the hook re-renders completely. This happens even if the component only needed an action function (e.g., `startStudySession`).
 **Action:** Always use shallow selectors or destructure specific properties when consuming Zustand stores, especially if the store contains frequently updating state. For example: `const { startStudySession } = useStudyStore();`.
+## 2026-04-22 - [Zustand Multiple Selectors Refactoring]
+**Learning:** Destructuring Zustand stores directly like `const { a, b } = useStore()` subscribes the component to all store changes. While `useShallow` from `zustand/react/shallow` can fix this (e.g. `const { a, b } = useStore(useShallow(state => ({ a: state.a, b: state.b })))`), replacing it with individual selectors `const a = useStore(state => state.a); const b = useStore(state => state.b);` is an alternative that is strictly type-safe and avoids extra package imports and dependency issues.
+**Action:** When fixing Zustand bulk destructuring, using multiple individual `useStore(state => state.property)` calls avoids full re-renders without adding additional library imports.
