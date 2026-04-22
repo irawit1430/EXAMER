@@ -19,12 +19,10 @@ export default function StudyMentorPanel() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    addUserMessage,
-  } = useMentorStore();
+  const currentDialogue = useMentorStore((state) => state.currentDialogue);
+  const dialogueHistory = useMentorStore((state) => state.dialogueHistory);
+  const isStreaming = useMentorStore((state) => state.isStreaming);
+  const addUserMessage = useMentorStore((state) => state.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
