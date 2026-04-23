@@ -66,8 +66,10 @@ export default function Modal({
             </h2>
             <button
               onClick={onClose}
+              aria-label="Close modal"
               className="absolute top-4 right-4 p-1.5 rounded-lg
-                hover:bg-surface-100 transition-colors text-text-muted hover:text-text-primary"
+                hover:bg-surface-100 transition-colors text-text-muted hover:text-text-primary
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50"
             >
               <X className="w-4 h-4" />
             </button>
