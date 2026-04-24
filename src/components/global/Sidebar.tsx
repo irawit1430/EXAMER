@@ -84,8 +84,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, setMobileOpen
           {/* Close button for mobile inside sidebar */}
           {mobileOpen && (
             <button
+              aria-label="Close sidebar"
               onClick={() => setMobileOpen?.(false)}
-              className="absolute right-4 p-1.5 md:hidden text-text-muted hover:text-text-primary hover:bg-surface-100 rounded-lg transition-colors"
+              className="absolute right-4 p-1.5 md:hidden text-text-muted hover:text-text-primary hover:bg-surface-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/20"
             >
               <X className="w-4 h-4" />
             </button>
