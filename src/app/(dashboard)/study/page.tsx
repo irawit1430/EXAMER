@@ -141,10 +141,12 @@ export default function StudyPage() {
   const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null);
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
 
-  const { user, syllabusTree } = useAuthStore();
-  const { triggerMentor } = useMentorStore();
-  const { startQuestion, recordAnswer } = useMetricsStore();
-  const { startStudySession } = useStudyStore(); // Get the study store instance
+  const user = useAuthStore((s) => s.user);
+  const syllabusTree = useAuthStore((s) => s.syllabusTree);
+  const triggerMentor = useMentorStore((s) => s.triggerMentor);
+  const startQuestion = useMetricsStore((s) => s.startQuestion);
+  const recordAnswer = useMetricsStore((s) => s.recordAnswer);
+  const startStudySession = useStudyStore((s) => s.startStudySession); // Get the study store instance
 
   // Tracking refs for cleanup
   const activeSessionRef = React.useRef<{

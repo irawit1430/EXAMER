@@ -11,14 +11,12 @@ import { useStudyStore } from "@/store/useStudyStore";
  */
 export function useActiveRecall() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const {
-    timer,
-    isReading,
-    isTimerRunning,
-    readingDuration,
-    tickTimer,
-    switchToRecall,
-  } = useStudyStore();
+  const timer = useStudyStore((s) => s.timer);
+  const isReading = useStudyStore((s) => s.isReading);
+  const isTimerRunning = useStudyStore((s) => s.isTimerRunning);
+  const readingDuration = useStudyStore((s) => s.readingDuration);
+  const tickTimer = useStudyStore((s) => s.tickTimer);
+  const switchToRecall = useStudyStore((s) => s.switchToRecall);
 
   useEffect(() => {
     if (!isTimerRunning || !isReading) {
