@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
 import { v4 as uuidv4 } from "uuid";
-import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
+import {
+  getVerifiedUidFromRequest,
+  FirebaseAuthError,
+} from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
 
@@ -66,17 +69,20 @@ export async function POST(req: NextRequest) {
     // Ensure IDs are present
     const cleanQuestions = questionsData.map((q: any) => ({
       ...q,
-      id: q.id || uuidv4()
+      id: q.id || uuidv4(),
     }));
 
     return NextResponse.json({ questions: cleanQuestions });
   } catch (error: any) {
     if (error instanceof FirebaseAuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
     console.error("Mock Questions API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate mock questions" },
+      { error: "Failed to generate mock questions" },
       { status: 500 },
     );
   }
