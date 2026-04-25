@@ -23,12 +23,7 @@ import {
   createStudySession,
   endStudySession,
 } from "@/lib/firebase/firestore";
-import {
-  BookOpen,
-  ArrowRight,
-  Trophy,
-  Loader2,
-} from "lucide-react";
+import { BookOpen, ArrowRight, Trophy, Loader2 } from "lucide-react";
 import type {
   QuizQuestion,
   MicroConcept,
@@ -131,20 +126,26 @@ export default function StudyPage() {
   );
   const [timer, setTimer] = useState(0);
   const [isBlurring, setIsBlurring] = useState(false);
-  const [feynmanEval, setFeynmanEval] = useState<FeynmanEvaluation | null>(null);
+  const [feynmanEval, setFeynmanEval] = useState<FeynmanEvaluation | null>(
+    null,
+  );
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [score, setScore] = useState({ correct: 0, incorrect: 0, total: 0 });
   const [concepts, setConcepts] = useState<ConceptItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(
+    null,
+  );
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
 
-  const { user, syllabusTree } = useAuthStore();
-  const { triggerMentor } = useMentorStore();
-  const { startQuestion, recordAnswer } = useMetricsStore();
-  const { startStudySession } = useStudyStore(); // Get the study store instance
+  const user = useAuthStore((state) => state.user);
+  const syllabusTree = useAuthStore((state) => state.syllabusTree);
+  const triggerMentor = useMentorStore((state) => state.triggerMentor);
+  const startQuestion = useMetricsStore((state) => state.startQuestion);
+  const recordAnswer = useMetricsStore((state) => state.recordAnswer);
+  const startStudySession = useStudyStore((state) => state.startStudySession); // Get the study store instance
 
   // Tracking refs for cleanup
   const activeSessionRef = React.useRef<{
@@ -167,7 +168,7 @@ export default function StudyPage() {
     const handleBeforeUnload = () => {
       const active = activeSessionRef.current;
       if (active.id && active.uid) {
-        // We use a beacon or direct firestore fetch if possible. 
+        // We use a beacon or direct firestore fetch if possible.
         // In client-side firebase, just calling the update is usually enough for SPA changes
         // but for tab closes, it's best-effort.
         const metrics = useMetricsStore.getState();
@@ -311,7 +312,7 @@ export default function StudyPage() {
     if (!selectedConcept?.concept.content) return 150; // Fallback
     const wordCount = selectedConcept.concept.content.split(/\s+/).length;
     // Calculate seconds: (words / 200 wpm) * 60, minimum 45 seconds
-    return Math.max(45, Math.ceil((wordCount / 200) * 60)); 
+    return Math.max(45, Math.ceil((wordCount / 200) * 60));
   }, [selectedConcept?.concept.content]);
 
   // Timer effect
@@ -347,7 +348,7 @@ export default function StudyPage() {
       item.concept.content === "";
     if (!isDefaultContent && item.concept.content.length > 50) {
       setSelectedConcept(item);
-      
+
       // Still need to generate the question
       setIsGeneratingQuestion(true);
       setCurrentQuestion(null);
@@ -357,7 +358,7 @@ export default function StudyPage() {
         body: JSON.stringify({
           concept: item.concept.name,
           subject: item.subject,
-          conceptId: item.concept.id
+          conceptId: item.concept.id,
         }),
       })
         .then((res) => res.json())
@@ -367,11 +368,7 @@ export default function StudyPage() {
         .catch((err) => console.error("Error generating question", err))
         .finally(() => setIsGeneratingQuestion(false));
 
-      startStudySession(
-        item.concept as MicroConcept,
-        item.subject,
-        "unknown",
-      );
+      startStudySession(item.concept as MicroConcept, item.subject, "unknown");
 
       if (user) {
         try {
@@ -421,9 +418,9 @@ export default function StudyPage() {
           body: JSON.stringify({
             concept: item.concept.name,
             subject: item.subject,
-            conceptId: item.concept.id
+            conceptId: item.concept.id,
           }),
-        }).catch(() => null)
+        }).catch(() => null),
       ]);
 
       if (!response.ok) {
@@ -431,7 +428,7 @@ export default function StudyPage() {
       }
 
       const data = await response.json();
-      
+
       if (questionResponse?.ok) {
         const questionData = await questionResponse.json();
         if (questionData.question) setCurrentQuestion(questionData.question);
@@ -605,7 +602,7 @@ export default function StudyPage() {
             importantMemories: [],
           };
 
-                    useMentorStore.getState().startStreamingMentor("errors");
+          useMentorStore.getState().startStreamingMentor("errors");
 
           const userId = user.uid;
           const idToken = await user.getIdToken();
@@ -653,7 +650,9 @@ export default function StudyPage() {
                   } else if (data.text) {
                     useMentorStore.getState().appendStreamChunk(data.text);
                   }
-                } catch { /* ignore parse error */ }
+                } catch {
+                  /* ignore parse error */
+                }
               }
             }
           }
