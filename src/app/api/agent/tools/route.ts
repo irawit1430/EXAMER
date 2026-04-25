@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
       }
       console.error("[/api/agent/tools] Error:", error);
       return NextResponse.json(
-        { error: error.message || "Internal server error" },
+        { error: "Internal server error" },
         { status: 500 },
       );
     }
@@ -122,7 +122,7 @@ export async function GET() {
       return NextResponse.json({ tools, count: tools.length });
     } catch (error: any) {
       return NextResponse.json(
-        { error: error.message || "Failed to list tools" },
+        { error: "Failed to list tools" },
         { status: 500 },
       );
     }

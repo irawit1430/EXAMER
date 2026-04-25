@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
     console.error("Study Content Generation API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate study content" },
+      { error: "Failed to generate study content" },
       { status: 500 },
     );
   }

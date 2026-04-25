@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
     console.error("Study Question Generation API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate study question" },
+      { error: "Failed to generate study question" },
       { status: 500 },
     );
   }
