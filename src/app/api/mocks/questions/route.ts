@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
     console.error("Mock Questions API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to generate mock questions" },
+      { error: "Failed to generate mock questions" },
       { status: 500 },
     );
   }
