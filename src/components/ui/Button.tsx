@@ -41,6 +41,7 @@ export default function Button({
       className={`inline-flex items-center justify-center font-medium
         transition-all duration-200 active:scale-[0.98]
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2
         ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || loading}
       {...props}
