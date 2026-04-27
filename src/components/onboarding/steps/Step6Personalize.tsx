@@ -69,11 +69,12 @@ export default function Step6Personalize({ data, updateData }: Props) {
       <div className="space-y-5 flex-1 overflow-y-auto pr-4 pb-4 scrollbar-thin scrollbar-thumb-surface-300 scrollbar-track-transparent">
         {PERSONAL_QUESTIONS.map((q) => (
           <div key={q.id} className="space-y-1.5">
-            <label className="block text-[13px] font-semibold text-text-primary">
+            <label htmlFor={q.id} className="block text-[13px] font-semibold text-text-primary">
               {q.label}
             </label>
             {q.type === "text" && (
               <input
+                id={q.id}
                 type="text"
                 placeholder={q.placeholder}
                 value={data.personalizedAnswers[q.id] || ""}
@@ -83,6 +84,7 @@ export default function Step6Personalize({ data, updateData }: Props) {
             )}
             {q.type === "date" && (
               <input
+                id={q.id}
                 type="date"
                 value={data.personalizedAnswers[q.id] || ""}
                 onChange={(e) => handleAnswerChange(q.id, e.target.value)}
@@ -92,6 +94,7 @@ export default function Step6Personalize({ data, updateData }: Props) {
             {q.type === "select" && (
               <div className="relative">
                 <select
+                  id={q.id}
                   value={data.personalizedAnswers[q.id] || ""}
                   onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg bg-surface-50 hover:bg-white border-2 border-border-default text-text-primary text-[13px] font-medium focus:outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all cursor-pointer appearance-none shadow-sm"
