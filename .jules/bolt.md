@@ -5,3 +5,6 @@
 ## 2024-05-20 - [Zustand Store Re-render Optimization in useActiveRecall and StudyPage]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. This causes the component using the hook to re-render whenever ANY property in the store changes, even properties it doesn't use. This is particularly problematic in hooks like `useActiveRecall` and components like `StudyPage` where the timer updates every second.
 **Action:** Used fine-grained individual selectors (e.g., `const prop = useStudyStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useStudyStore()`) to prevent unnecessary component re-renders when other state in the store changes.
+## 2026-04-28 - [O(1) Concept Lookups in Dashboard]
+**Learning:** Found O(n^4) nested loops inside a `.map()` in `src/app/(dashboard)/dashboard/page.tsx` when matching weak topics against the syllabus tree. This causes excessive processing when the syllabus tree is deeply nested and weak topics array is large.
+**Action:** Replaced the O(n^4) lookups with an O(1) Map. First pre-calculated a `conceptLookup` Map and a `flatConcepts` array in a single traversal of the syllabus tree, then used them for O(1) lookups and a simple `.slice(0, 4)` to generate the dashboard data.
