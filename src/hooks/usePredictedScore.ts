@@ -24,8 +24,10 @@ export function usePredictedScore(
   currentStreakDay: number = 0,
   previousScore?: number,
 ): { prediction: ScorePrediction; delta: number } {
-  const { correctCount, incorrectCount, avgSecondsPerQuestion } =
-    useMetricsStore();
+  // Performance optimization: Using fine-grained selectors to prevent unnecessary re-renders
+  const correctCount = useMetricsStore((s) => s.correctCount);
+  const incorrectCount = useMetricsStore((s) => s.incorrectCount);
+  const avgSecondsPerQuestion = useMetricsStore((s) => s.avgSecondsPerQuestion);
 
   const prediction = useMemo(() => {
     // 1. Use historical progress
