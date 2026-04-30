@@ -67,7 +67,10 @@ const fallbackAccuracyData = [
 
 export default function AnalyticsPage() {
   const { prediction, delta } = usePredictedScore();
-  const { user, syllabusTree } = useAuthStore();
+  // Performance optimization: Using fine-grained selectors to prevent unnecessary re-renders
+  const user = useAuthStore((s) => s.user);
+  const syllabusTree = useAuthStore((s) => s.syllabusTree);
+
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
