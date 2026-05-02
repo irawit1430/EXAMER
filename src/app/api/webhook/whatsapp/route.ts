@@ -137,6 +137,30 @@ async function handleWhatsAppMessageBackground(from: string, msgBody: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+    if (!WHATSAPP_APP_SECRET) {
+      console.error("Critical Configuration Error: WHATSAPP_APP_SECRET is not set.");
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+
+    const signatureHeader = req.headers.get("x-hub-signature-256");
+    if (!signatureHeader) {
+      return new NextResponse("Missing Signature", { status: 401 });
+    }
+
+    const rawBody = await req.clone().text();
+    const expectedSignature = `sha256=${crypto
+      .createHmac("sha256", WHATSAPP_APP_SECRET)
+      .update(rawBody)
+      .digest("hex")}`;
+
+    const sigHash = crypto.createHash("sha256").update(signatureHeader).digest();
+    const expectedSigHash = crypto.createHash("sha256").update(expectedSignature).digest();
+
+    if (!crypto.timingSafeEqual(sigHash, expectedSigHash)) {
+      return new NextResponse("Invalid Signature", { status: 403 });
+    }
+
     const body = await req.json();
 
     // Verify it's from the expected WhatsApp API structure
