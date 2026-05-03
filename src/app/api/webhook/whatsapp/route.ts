@@ -6,7 +6,6 @@ import { getUserByWhatsAppNumber } from "@/lib/firebase/firestore-admin";
 import { buildMentorPrompt, streamMentorResponse } from "@/lib/gemini/client";
 import { AIContextPayload } from "@/types";
 
-
 /**
  * GET requests are typically used by WhatsApp/Meta to verify the webhook URL.
  */
@@ -27,8 +26,11 @@ export async function GET(req: NextRequest) {
 
   if (mode && token) {
     if (mode === "subscribe") {
-      const tokenHash = crypto.createHash('sha256').update(token).digest();
-      const verifyTokenHash = crypto.createHash('sha256').update(WHATSAPP_VERIFY_TOKEN).digest();
+      const tokenHash = crypto.createHash("sha256").update(token).digest();
+      const verifyTokenHash = crypto
+        .createHash("sha256")
+        .update(WHATSAPP_VERIFY_TOKEN)
+        .digest();
 
       if (crypto.timingSafeEqual(tokenHash, verifyTokenHash)) {
         // Return the challenge as plain text to pass verification
@@ -137,6 +139,35 @@ async function handleWhatsAppMessageBackground(from: string, msgBody: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const rawBody = await req.clone().text();
+    const signature = req.headers.get("x-hub-signature-256");
+    const appSecret = process.env.WHATSAPP_APP_SECRET;
+
+    if (appSecret && signature) {
+      const expectedSignature = `sha256=${crypto
+        .createHmac("sha256", appSecret)
+        .update(rawBody)
+        .digest("hex")}`;
+
+      const expectedHash = crypto
+        .createHash("sha256")
+        .update(expectedSignature)
+        .digest();
+      const actualHash = crypto.createHash("sha256").update(signature).digest();
+
+      if (!crypto.timingSafeEqual(expectedHash, actualHash)) {
+        console.error("WhatsApp Webhook Signature Verification Failed.");
+        return new NextResponse("Unauthorized", { status: 401 });
+      }
+    } else if (!appSecret) {
+      console.warn(
+        "WHATSAPP_APP_SECRET is not configured. Webhook signature verification bypassed.",
+      );
+    } else if (!signature) {
+      console.error("Missing x-hub-signature-256 header.");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const body = await req.json();
 
     // Verify it's from the expected WhatsApp API structure
