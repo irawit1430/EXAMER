@@ -6,7 +6,6 @@ import { getUserByWhatsAppNumber } from "@/lib/firebase/firestore-admin";
 import { buildMentorPrompt, streamMentorResponse } from "@/lib/gemini/client";
 import { AIContextPayload } from "@/types";
 
-
 /**
  * GET requests are typically used by WhatsApp/Meta to verify the webhook URL.
  */
@@ -27,8 +26,11 @@ export async function GET(req: NextRequest) {
 
   if (mode && token) {
     if (mode === "subscribe") {
-      const tokenHash = crypto.createHash('sha256').update(token).digest();
-      const verifyTokenHash = crypto.createHash('sha256').update(WHATSAPP_VERIFY_TOKEN).digest();
+      const tokenHash = crypto.createHash("sha256").update(token).digest();
+      const verifyTokenHash = crypto
+        .createHash("sha256")
+        .update(WHATSAPP_VERIFY_TOKEN)
+        .digest();
 
       if (crypto.timingSafeEqual(tokenHash, verifyTokenHash)) {
         // Return the challenge as plain text to pass verification
@@ -137,7 +139,40 @@ async function handleWhatsAppMessageBackground(from: string, msgBody: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const rawBody = await req.clone().text();
+    const signature = req.headers.get("x-hub-signature-256");
+    const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+
+    if (!WHATSAPP_APP_SECRET) {
+      console.error(
+        "Critical Configuration Error: WHATSAPP_APP_SECRET is not set.",
+      );
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+
+    if (!signature || !signature.startsWith("sha256=")) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    const expectedSignature = `sha256=${crypto
+      .createHmac("sha256", WHATSAPP_APP_SECRET)
+      .update(rawBody)
+      .digest("hex")}`;
+
+    const signatureHash = crypto
+      .createHash("sha256")
+      .update(signature)
+      .digest();
+    const expectedSignatureHash = crypto
+      .createHash("sha256")
+      .update(expectedSignature)
+      .digest();
+
+    if (!crypto.timingSafeEqual(signatureHash, expectedSignatureHash)) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    const body = JSON.parse(rawBody);
 
     // Verify it's from the expected WhatsApp API structure
     if (body.object) {
