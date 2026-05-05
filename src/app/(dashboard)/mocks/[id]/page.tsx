@@ -268,7 +268,8 @@ export default function MockTestTakingPage() {
              <button
                 key={option.id}
                 onClick={() => handleSelectOption(option.id)}
-                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200
+                aria-pressed={selectedOption === option.id}
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary
                    ${selectedOption === option.id ? "border-brand-primary/50 bg-brand-primary/5 shadow-sm" : "border-border-subtle hover:border-brand-primary/30 hover:bg-surface-50"}
                 `}
              >
@@ -298,7 +299,8 @@ export default function MockTestTakingPage() {
             <button
                key={q.id}
                onClick={() => setCurrentIdx(i)}
-               className={`w-8 h-8 flex flex-col items-center justify-center rounded-lg text-xs font-bold transition-colors
+               aria-pressed={currentIdx === i}
+               className={`w-8 h-8 flex flex-col items-center justify-center rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-1
                   ${currentIdx === i ? "ring-2 ring-brand-primary ring-offset-2 ring-offset-surface-50" : ""}
                   ${answers[q.id] ? "bg-brand-primary text-white" : "bg-surface-100 text-text-muted hover:bg-surface-200"}
                `}
