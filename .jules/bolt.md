@@ -5,3 +5,7 @@
 ## 2024-05-20 - [Zustand Store Re-render Optimization in useActiveRecall and StudyPage]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. This causes the component using the hook to re-render whenever ANY property in the store changes, even properties it doesn't use. This is particularly problematic in hooks like `useActiveRecall` and components like `StudyPage` where the timer updates every second.
 **Action:** Used fine-grained individual selectors (e.g., `const prop = useStudyStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useStudyStore()`) to prevent unnecessary component re-renders when other state in the store changes.
+
+## 2024-05-24 - [Concurrent Firestore Data Fetching Optimization]
+**Learning:** Sequential await calls for independent data queries (e.g., fetching multiple aggregated stats and session queries at once) introduce unnecessary cumulative latency. In this codebase's architecture, Firebase operations can and should be parallelized where possible.
+**Action:** Use `Promise.all()` to execute independent Firestore fetch functions (like `getProgressStats`, `getTodaysStudySessions`, and `getStudySessions`) concurrently, destructuring the results afterwards to significantly improve latency and execution speed.
