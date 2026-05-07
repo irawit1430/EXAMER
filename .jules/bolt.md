@@ -5,3 +5,7 @@
 ## 2024-05-20 - [Zustand Store Re-render Optimization in useActiveRecall and StudyPage]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. This causes the component using the hook to re-render whenever ANY property in the store changes, even properties it doesn't use. This is particularly problematic in hooks like `useActiveRecall` and components like `StudyPage` where the timer updates every second.
 **Action:** Used fine-grained individual selectors (e.g., `const prop = useStudyStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useStudyStore()`) to prevent unnecessary component re-renders when other state in the store changes.
+
+## 2024-05-23 - [Zustand Store Re-render Optimization in Custom Hooks]
+**Learning:** Calling a Zustand store hook like `useMetricsStore()` or `useAuthStore()` without a selector returns the entire state object. This causes the component using the hook (or the component using a custom hook that uses the store hook) to re-render whenever ANY property in the store changes. This was observed in `usePredictedScore` and `useSpeedTracker` causing `DashboardPage` and `AnalyticsPage` to re-render unnecessarily on metric updates.
+**Action:** Always use fine-grained individual selectors (e.g., `const prop = useMetricsStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useMetricsStore()`) even inside custom hooks, to prevent unnecessary component re-renders.

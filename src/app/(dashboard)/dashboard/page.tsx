@@ -79,7 +79,9 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const { prediction, delta } = usePredictedScore();
-  const { user, profile, syllabusTree } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+  const syllabusTree = useAuthStore((s) => s.syllabusTree);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -328,9 +330,7 @@ export default function DashboardPage() {
 
         {/* Quick Stats Grid */}
         <div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <BookOpen className="w-4 h-4 text-text-secondary" />
             </div>
@@ -344,9 +344,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <Clock className="w-4 h-4 text-text-secondary" />
             </div>
@@ -361,9 +359,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <Target className="w-4 h-4 text-text-secondary" />
             </div>
@@ -378,9 +374,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <TrendingUp className="w-4 h-4 text-text-secondary" />
             </div>
