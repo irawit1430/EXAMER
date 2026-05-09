@@ -137,6 +137,26 @@ async function handleWhatsAppMessageBackground(from: string, msgBody: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const signature = req.headers.get("x-hub-signature-256");
+    const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+
+    if (!signature || !WHATSAPP_APP_SECRET) {
+      console.error("Missing webhook signature or app secret");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const rawBody = await req.clone().text();
+    const hmac = crypto.createHmac("sha256", WHATSAPP_APP_SECRET).update(rawBody).digest("hex");
+    const expectedSignature = `sha256=${hmac}`;
+
+    const expectedHash = crypto.createHash("sha256").update(expectedSignature).digest();
+    const providedHash = crypto.createHash("sha256").update(signature).digest();
+
+    if (expectedHash.byteLength !== providedHash.byteLength || !crypto.timingSafeEqual(expectedHash, providedHash)) {
+      console.error("Invalid webhook signature");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const body = await req.json();
 
     // Verify it's from the expected WhatsApp API structure
