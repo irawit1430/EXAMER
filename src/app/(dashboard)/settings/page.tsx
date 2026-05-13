@@ -87,13 +87,18 @@ export default function SettingsPage() {
   const Toggle = ({
     checked,
     onChange,
+    ariaLabel,
   }: {
     checked: boolean;
     onChange: (val: boolean) => void;
+    ariaLabel?: string;
   }) => (
     <button
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
       onClick={() => onChange(!checked)}
-      className={`w-12 h-7 rounded-full transition-colors flex items-center px-1
+      className={`w-12 h-7 rounded-full transition-colors flex items-center px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary
         ${checked ? "bg-success" : "bg-surface-300"}`}
     >
       <div
@@ -135,10 +140,11 @@ export default function SettingsPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="display-name" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Display Name
             </label>
             <input
+              id="display-name"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -146,10 +152,11 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="target-score" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Target Score
             </label>
             <input
+              id="target-score"
               type="number"
               value={targetScore}
               onChange={(e) => setTargetScore(e.target.value)}
@@ -168,10 +175,11 @@ export default function SettingsPage() {
         </h2>
         <div className="space-y-3">
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="reading-duration" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Reading Duration (seconds before recall)
             </label>
             <input
+              id="reading-duration"
               type="number"
               value={readingDuration}
               onChange={(e) => setReadingDuration(e.target.value)}
@@ -217,7 +225,7 @@ export default function SettingsPage() {
                   {item.desc}
                 </p>
               </div>
-              <Toggle checked={item.default} onChange={() => {}} />{" "}
+              <Toggle checked={item.default} onChange={() => {}} ariaLabel={`Toggle ${item.title}`} />{" "}
               {/* Placeholder onChange */}
             </div>
           ))}
@@ -238,7 +246,7 @@ export default function SettingsPage() {
               Switch to dark theme
             </p>
           </div>
-          <Toggle checked={darkMode} onChange={setDarkMode} />
+          <Toggle checked={darkMode} onChange={setDarkMode} ariaLabel="Toggle Dark Mode" />
         </div>
       </Card>
 
