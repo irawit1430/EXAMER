@@ -5,3 +5,7 @@
 ## 2024-05-20 - [Zustand Store Re-render Optimization in useActiveRecall and StudyPage]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. This causes the component using the hook to re-render whenever ANY property in the store changes, even properties it doesn't use. This is particularly problematic in hooks like `useActiveRecall` and components like `StudyPage` where the timer updates every second.
 **Action:** Used fine-grained individual selectors (e.g., `const prop = useStudyStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useStudyStore()`) to prevent unnecessary component re-renders when other state in the store changes.
+
+## 2024-05-24 - [O(N*M) Loop Optimization using Pre-calculated Lookup Maps in Dashboard]
+**Learning:** In React components like `DashboardPage` (`src/app/(dashboard)/dashboard/page.tsx`), doing complex deep tree traversals and array mappings inside a `.map` operation over network-fetched array results in significant processing overhead, especially since the UI blocks while these arrays calculate.
+**Action:** Always pre-calculate flattened arrays (like `flatConcepts`) and dictionary lookup Maps (`conceptLookup`) beforehand if the same nested structure is queried multiple times. Lookups against a pre-populated `Map` are O(1) compared to O(N*M) nested traversals.
