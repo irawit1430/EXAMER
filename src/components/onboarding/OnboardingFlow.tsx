@@ -40,7 +40,7 @@ export default function OnboardingFlow() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { updateProfile } = useAuthStore();
+  const updateProfile = useAuthStore((s) => s.updateProfile);
 
   const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, 6));
   const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
