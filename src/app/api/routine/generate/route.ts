@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
-import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
+import {
+  getVerifiedUidFromRequest,
+  FirebaseAuthError,
+} from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs";
 
@@ -86,7 +89,10 @@ ${syllabus}
     }
   } catch (error: any) {
     if (error instanceof FirebaseAuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
     console.error("Routine Generation API Error:", error);
     return NextResponse.json(

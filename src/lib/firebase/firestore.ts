@@ -613,13 +613,16 @@ export async function getMockTests(userId: string): Promise<MockTest[]> {
   })) as MockTest[];
 }
 
-export async function saveMockTests(userId: string, tests: MockTest[]): Promise<void> {
+export async function saveMockTests(
+  userId: string,
+  tests: MockTest[],
+): Promise<void> {
   const colRef = collection(db, "users", userId, "mock_tests");
   await Promise.all(
     tests.map((test) => {
       const docRef = doc(colRef, test.id);
       return setDoc(docRef, test);
-    })
+    }),
   );
 }
 
@@ -868,11 +871,12 @@ export async function getWeeklySpeedAccuracy(uid: string): Promise<{
     const q = query(
       ref,
       where("startTime", ">=", Timestamp.fromDate(sevenDaysAgo)),
-      orderBy("startTime", "asc")
+      orderBy("startTime", "asc"),
     );
     snap = await getDocs(q);
   } catch (error: any) {
-    if (isPermissionDenied(error)) markFirestoreDenied("getWeeklySpeedAccuracy", error);
+    if (isPermissionDenied(error))
+      markFirestoreDenied("getWeeklySpeedAccuracy", error);
     else console.warn("Error in getWeeklySpeedAccuracy:", error);
   }
 
@@ -946,7 +950,7 @@ export async function getWeakTopics(
     // but we can at least filter by status !== mastered and totalAttempts > 0
     const q = query(
       ref,
-      where("status", "in", ["new", "learning", "review_24h"])
+      where("status", "in", ["new", "learning", "review_24h"]),
     );
     const snap = await getDocs(q);
 

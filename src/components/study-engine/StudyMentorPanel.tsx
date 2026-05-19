@@ -19,12 +19,10 @@ export default function StudyMentorPanel() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    addUserMessage,
-  } = useMentorStore();
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -87,7 +85,7 @@ export default function StudyMentorPanel() {
       );
       if (englishVoice) utterance.voice = englishVoice;
 
-      synthRef.current.cancel(); 
+      synthRef.current.cancel();
       synthRef.current.speak(utterance);
     }
   }, [dialogueHistory, isMuted, isStreaming]);
@@ -112,7 +110,7 @@ export default function StudyMentorPanel() {
     addUserMessage(textToSend);
     setUserInput("");
 
-    if (synthRef.current) synthRef.current.cancel(); 
+    if (synthRef.current) synthRef.current.cancel();
 
     try {
       const store = useMentorStore.getState();
@@ -203,7 +201,7 @@ export default function StudyMentorPanel() {
   }, [dialogueHistory, currentDialogue, isStreaming]);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
@@ -223,9 +221,7 @@ export default function StudyMentorPanel() {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-text-primary">
-              AI Tutor
-            </h3>
+            <h3 className="text-sm font-bold text-text-primary">AI Tutor</h3>
             <p className="text-[11px] font-medium text-text-secondary">
               {isStreaming
                 ? "Typing a response"
@@ -246,9 +242,7 @@ export default function StudyMentorPanel() {
             type="button"
             onClick={() => setIsMuted((value) => !value)}
             className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
-            aria-label={
-              isMuted ? "Unmute mentor voice" : "Mute mentor voice"
-            }
+            aria-label={isMuted ? "Unmute mentor voice" : "Mute mentor voice"}
           >
             {isMuted ? (
               <VolumeX className="w-4 h-4" />
@@ -267,9 +261,9 @@ export default function StudyMentorPanel() {
       >
         {dialogueHistory.length === 0 && !isStreaming ? (
           <div className="flex flex-1 items-center justify-center py-2">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }} 
-              animate={{ opacity: 1, scale: 1 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
               className="w-full max-w-sm rounded-2xl border border-border-default bg-surface-50 p-6 sm:p-8 text-center"
             >
@@ -284,7 +278,10 @@ export default function StudyMentorPanel() {
               </h4>
               <p className="mt-3 text-[14px] leading-6 text-text-secondary px-2">
                 Ask for a quiz, a simpler explanation, or a plan for{" "}
-                <span className="font-semibold text-text-primary">{profile?.favoriteSubject || "the current topic"}</span>.
+                <span className="font-semibold text-text-primary">
+                  {profile?.favoriteSubject || "the current topic"}
+                </span>
+                .
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {quickPrompts.map((prompt, index) => (
@@ -359,9 +356,29 @@ export default function StudyMentorPanel() {
                       </div>
                     ) : (
                       <div className="mt-2 flex items-center h-[24px] gap-1.5 px-1 w-fit">
-                        <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                        <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                        <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                        <motion.div
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{ repeat: Infinity, duration: 1.2 }}
+                          className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                        />
+                        <motion.div
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{
+                            repeat: Infinity,
+                            duration: 1.2,
+                            delay: 0.2,
+                          }}
+                          className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                        />
+                        <motion.div
+                          animate={{ opacity: [0.3, 1, 0.3] }}
+                          transition={{
+                            repeat: Infinity,
+                            duration: 1.2,
+                            delay: 0.4,
+                          }}
+                          className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                        />
                       </div>
                     )}
                   </div>

@@ -115,7 +115,9 @@ async function handleChat(event: AgentEvent): Promise<AgentResponse> {
       });
 
       // 1. Coordinator determines the route
-      const route = event.payload.targetAgent || await coordinatorAgent.determineRoute(event);
+      const route =
+        event.payload.targetAgent ||
+        (await coordinatorAgent.determineRoute(event));
       console.log(`[Coordinator] Routing chat to: ${route}`);
       const runtime = agents[route];
 
@@ -135,7 +137,7 @@ async function handleChat(event: AgentEvent): Promise<AgentResponse> {
                 toolResult: toolResults,
               }
             : {}),
-        }
+        },
       });
 
       return {
@@ -175,7 +177,9 @@ async function handleStreamingChat(event: AgentEvent): Promise<AgentResponse> {
       });
 
       // 1. Coordinator determines the route
-      const route = event.payload.targetAgent || await coordinatorAgent.determineRoute(event);
+      const route =
+        event.payload.targetAgent ||
+        (await coordinatorAgent.determineRoute(event));
       console.log(`[Coordinator] Routing streaming request to: ${route}`);
       const runtime = agents[route];
 

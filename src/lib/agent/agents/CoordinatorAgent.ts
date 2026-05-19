@@ -23,21 +23,23 @@ export class CoordinatorAgent {
     });
   }
 
-  async determineRoute(event: AgentEvent): Promise<"mentor" | "assessment" | "planner" | "analytics"> {
+  async determineRoute(
+    event: AgentEvent,
+  ): Promise<"mentor" | "assessment" | "planner" | "analytics"> {
     // Determine which agent should handle this
     const response = await this.runtime.generateResponse({
       ...event,
       payload: {
         ...event.payload,
         message: `Which agent should handle this request? "${event.payload.message}"`,
-      }
+      },
     });
 
     const route = response.text.toLowerCase().trim();
     if (["mentor", "assessment", "planner", "analytics"].includes(route)) {
       return route as any;
     }
-    
+
     return "mentor"; // Default fallback
   }
 }

@@ -12,7 +12,11 @@ export class AssessmentAgent extends AgentRuntime {
   constructor() {
     super({
       systemInstruction: ASSESSMENT_INSTRUCTION,
-      allowedTools: ["generate_mcq", "evaluate_user_answer", "get_mock_test_results"],
+      allowedTools: [
+        "generate_mcq",
+        "evaluate_user_answer",
+        "get_mock_test_results",
+      ],
       temperature: 0.5,
     });
   }

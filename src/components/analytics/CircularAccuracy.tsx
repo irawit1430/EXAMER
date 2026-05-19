@@ -5,7 +5,10 @@ interface CircularAccuracyProps {
   total: number;
 }
 
-export default function CircularAccuracy({ correct, total }: CircularAccuracyProps) {
+export default function CircularAccuracy({
+  correct,
+  total,
+}: CircularAccuracyProps) {
   const percentage = total === 0 ? 0 : Math.round((correct / total) * 100);
   const radius = 16;
   const circumference = 2 * Math.PI * radius;
@@ -24,21 +27,27 @@ export default function CircularAccuracy({ correct, total }: CircularAccuracyPro
         <svg width="32" height="32" className="transform -rotate-90">
           {/* Track Circle */}
           <circle
-            cx="16" cy="16" r={radius}
+            cx="16"
+            cy="16"
+            r={radius}
             stroke="var(--surface-200, #e8e8ed)"
             strokeWidth="3.5"
             fill="none"
           />
           {/* Progress Circle */}
           <circle
-            cx="16" cy="16" r={radius}
+            cx="16"
+            cy="16"
+            r={radius}
             stroke="#10b981" // iOS-style green for accuracy success
             strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
+            style={{
+              transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
           />
         </svg>
       </div>
@@ -47,7 +56,9 @@ export default function CircularAccuracy({ correct, total }: CircularAccuracyPro
           Accuracy
         </span>
         <div className="flex items-center gap-1 text-xs font-semibold tracking-tight text-text-primary leading-none">
-          <span>{correct} / {total}</span>
+          <span>
+            {correct} / {total}
+          </span>
         </div>
       </div>
     </div>

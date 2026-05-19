@@ -345,7 +345,7 @@ export class LongTermMemoryManager {
         profile.dailyStudyTime =
           firestoreUser.dailyStudyTime || profile.dailyStudyTime;
         profile.personalizedAnswers =
-          firestoreUser.personalizedAnswers || profile.personalizedAnswers;     
+          firestoreUser.personalizedAnswers || profile.personalizedAnswers;
       } else if (firestoreUser) {
         // User exists but hasn't completed onboarding — still grab what we can
         profile.displayName = firestoreUser.displayName || profile.displayName;
@@ -537,11 +537,13 @@ export class LongTermMemoryManager {
 
     const memories = profile.importantMemories.slice(-5).join(". ");
 
-      const personalizedStr = profile.personalizedAnswers 
-        ? Object.entries(profile.personalizedAnswers).map(([k, v]) => `  - ${k}: ${v}`).join("\n") 
-        : "None";
+    const personalizedStr = profile.personalizedAnswers
+      ? Object.entries(profile.personalizedAnswers)
+          .map(([k, v]) => `  - ${k}: ${v}`)
+          .join("\n")
+      : "None";
 
-      return `--- Student Profile (Long-Term Memory) ---
+    return `--- Student Profile (Long-Term Memory) ---
       Profile Status: ${isPlaceholderProfile ? "Placeholder/default only. Use data tools before making personalized claims." : "Loaded from persisted memory."}
   Name: ${profile.displayName}
   Target Exam: ${profile.targetExam}

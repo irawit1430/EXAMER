@@ -11,7 +11,12 @@ export class AnalyticsAgent extends AgentRuntime {
   constructor() {
     super({
       systemInstruction: ANALYTICS_INSTRUCTION,
-      allowedTools: ["get_dashboard_stats", "get_weak_topics", "get_mock_test_results", "get_recent_activity"],
+      allowedTools: [
+        "get_dashboard_stats",
+        "get_weak_topics",
+        "get_mock_test_results",
+        "get_recent_activity",
+      ],
       temperature: 0.3, // Objective analysis
     });
   }

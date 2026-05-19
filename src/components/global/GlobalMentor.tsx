@@ -4,7 +4,15 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useMentorStore } from "@/store/useMentorStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
-import { X, Minimize2, Maximize2, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
+import {
+  X,
+  Minimize2,
+  Maximize2,
+  Send,
+  Sparkles,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
@@ -20,16 +28,14 @@ export default function GlobalMentor() {
   const pathname = usePathname();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    isExpanded,
-    isPulsing,
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    toggleExpanded,
-    dismissMentor,
-    addUserMessage,
-  } = useMentorStore();
+  const isExpanded = useMentorStore((s) => s.isExpanded);
+  const isPulsing = useMentorStore((s) => s.isPulsing);
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const toggleExpanded = useMentorStore((s) => s.toggleExpanded);
+  const dismissMentor = useMentorStore((s) => s.dismissMentor);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -231,7 +237,9 @@ export default function GlobalMentor() {
   const isHidden = pathname?.includes("/study");
 
   return (
-    <div className={`flex flex-col items-end gap-4 pointer-events-none ${isHidden ? "hidden" : ""}`}>
+    <div
+      className={`flex flex-col items-end gap-4 pointer-events-none ${isHidden ? "hidden" : ""}`}
+    >
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -242,8 +250,10 @@ export default function GlobalMentor() {
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             className="flex w-[min(420px,calc(100vw-1rem))] flex-col overflow-hidden rounded-[28px] border border-border-subtle bg-white/96 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:w-[420px] pointer-events-auto"
             style={{
-              height: isTall ? "calc(100vh - 5rem)" : "min(620px, calc(100vh - 5rem))",
-              transition: "height 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
+              height: isTall
+                ? "calc(100vh - 5rem)"
+                : "min(620px, calc(100vh - 5rem))",
+              transition: "height 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
             <div className="flex items-center justify-between border-b border-border-subtle bg-white/70 backdrop-blur-md px-5 py-4 z-10 relative">
@@ -259,7 +269,9 @@ export default function GlobalMentor() {
                   )}
                 </div>
                 <div className="select-none flex-1">
-                  <h3 className="text-sm font-bold text-text-primary">EXAMER Mentor</h3>
+                  <h3 className="text-sm font-bold text-text-primary">
+                    EXAMER Mentor
+                  </h3>
                   <p className="text-[11px] font-medium text-text-secondary truncate max-w-[120px] sm:max-w-[160px]">
                     {isStreaming
                       ? "Typing a response"
@@ -276,20 +288,34 @@ export default function GlobalMentor() {
                 >
                   {isStreaming ? "Thinking" : "Live"}
                 </span>
-                
+
                 <div className="flex items-center">
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setIsTall(!isTall); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsTall(!isTall);
+                    }}
                     className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
-                    aria-label={isTall ? "Shrink mentor chat" : "Expand mentor chat height"}
+                    aria-label={
+                      isTall
+                        ? "Shrink mentor chat"
+                        : "Expand mentor chat height"
+                    }
                     onPointerDown={(e) => e.stopPropagation()}
                   >
-                    {isTall ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                    {isTall ? (
+                      <Minimize2 className="w-4 h-4" />
+                    ) : (
+                      <Maximize2 className="w-4 h-4" />
+                    )}
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setIsMuted((value) => !value); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted((value) => !value);
+                    }}
                     className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
                     aria-label={
                       isMuted ? "Unmute mentor voice" : "Mute mentor voice"
@@ -304,7 +330,10 @@ export default function GlobalMentor() {
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); toggleExpanded(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleExpanded();
+                    }}
                     className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
                     aria-label="Minimize mentor chat"
                     onPointerDown={(e) => e.stopPropagation()}
@@ -323,9 +352,9 @@ export default function GlobalMentor() {
             >
               {dialogueHistory.length === 0 && !isStreaming ? (
                 <div className="flex flex-1 items-center justify-center py-2">
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }} 
-                    animate={{ opacity: 1, scale: 1 }} 
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4 }}
                     className="w-full max-w-sm rounded-2xl border border-border-default bg-surface-50 p-6 sm:p-8 text-center"
                   >
@@ -340,14 +369,20 @@ export default function GlobalMentor() {
                     </h4>
                     <p className="mt-3 text-[14px] leading-6 text-text-secondary px-2">
                       Ask for a quiz, a simpler explanation, or a plan for{" "}
-                      <span className="font-semibold text-text-primary">{profile?.favoriteSubject || "the current topic"}</span>.
+                      <span className="font-semibold text-text-primary">
+                        {profile?.favoriteSubject || "the current topic"}
+                      </span>
+                      .
                     </p>
                     <div className="mt-6 flex flex-wrap justify-center gap-2">
                       {quickPrompts.map((prompt, index) => (
                         <motion.button
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.15 + index * 0.05, duration: 0.3 }}
+                          transition={{
+                            delay: 0.15 + index * 0.05,
+                            duration: 0.3,
+                          }}
                           key={prompt.label}
                           type="button"
                           onClick={() => handleSend(prompt.prompt)}
@@ -369,7 +404,11 @@ export default function GlobalMentor() {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 24,
+                        }}
                         className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                       >
                         <div
@@ -402,7 +441,11 @@ export default function GlobalMentor() {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 24,
+                        }}
                         className="flex w-full justify-start mt-2"
                       >
                         <div className="max-w-[84%] rounded-xl rounded-tl-[4px] border border-border-default bg-white px-5 py-4">
@@ -415,9 +458,29 @@ export default function GlobalMentor() {
                             </div>
                           ) : (
                             <div className="mt-2 flex items-center h-[24px] gap-1.5 px-1 w-fit">
-                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                              <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                              <motion.div
+                                animate={{ opacity: [0.3, 1, 0.3] }}
+                                transition={{ repeat: Infinity, duration: 1.2 }}
+                                className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                              />
+                              <motion.div
+                                animate={{ opacity: [0.3, 1, 0.3] }}
+                                transition={{
+                                  repeat: Infinity,
+                                  duration: 1.2,
+                                  delay: 0.2,
+                                }}
+                                className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                              />
+                              <motion.div
+                                animate={{ opacity: [0.3, 1, 0.3] }}
+                                transition={{
+                                  repeat: Infinity,
+                                  duration: 1.2,
+                                  delay: 0.4,
+                                }}
+                                className="w-1.5 h-1.5 rounded-full bg-brand-primary"
+                              />
                             </div>
                           )}
                         </div>
@@ -459,7 +522,10 @@ export default function GlobalMentor() {
 
                 <div className="mt-2 flex items-end justify-between gap-3 px-2 pb-1">
                   <p className="text-[11px] text-text-muted">
-                    Enter to send. <span className="hidden sm:inline">Shift+Enter for a new line.</span>
+                    Enter to send.{" "}
+                    <span className="hidden sm:inline">
+                      Shift+Enter for a new line.
+                    </span>
                   </p>
                   <button
                     type="button"
