@@ -54,7 +54,9 @@ const fallbackMockTests = [
 ];
 
 export default function MocksPage() {
-  const { user, profile } = useAuthStore();
+  // ⚡ Bolt: Use fine-grained selectors to prevent unnecessary re-renders
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
   const [tests, setTests] = useState<MockTest[]>([]);
   const [conceptsMastered, setConceptsMastered] = useState(0);
   const [loading, setLoading] = useState(true);
