@@ -109,6 +109,7 @@ export default function Step3FavoriteSubject({ data, updateData }: Props) {
           <button
             key={sub.id}
             onClick={() => updateData({ favoriteSubject: sub.name })}
+            aria-pressed={data.favoriteSubject === sub.name}
             className={`p-3.5 rounded-xl border-2 flex items-center text-left transition-all duration-300 min-h-[80px] ${
               data.favoriteSubject === sub.name
                 ? "border-brand-primary bg-brand-primary/5 shadow-sm scale-[1.02]"

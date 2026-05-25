@@ -52,6 +52,7 @@ export default function Step5PrepLevel({ data, updateData }: Props) {
           <button
             key={lvl.value}
             onClick={() => updateData({ prepLevel: lvl.value })}
+            aria-pressed={data.prepLevel === lvl.value}
             className={`p-4 rounded-xl border-2 flex items-center text-left transition-all duration-300 min-h-[80px] ${
               data.prepLevel === lvl.value
                 ? "border-brand-primary bg-brand-primary/5 shadow-sm scale-[1.02]"
