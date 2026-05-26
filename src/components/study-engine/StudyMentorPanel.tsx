@@ -19,12 +19,13 @@ export default function StudyMentorPanel() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    addUserMessage,
-  } = useMentorStore();
+
+  // ⚡ Bolt: Using atomic selectors instead of destructuring the entire store
+  // Prevents full component re-renders when other unused state properties update
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
