@@ -20,16 +20,16 @@ export default function GlobalMentor() {
   const pathname = usePathname();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    isExpanded,
-    isPulsing,
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    toggleExpanded,
-    dismissMentor,
-    addUserMessage,
-  } = useMentorStore();
+
+  // ⚡ Bolt: Using atomic selectors instead of destructuring the entire store
+  // Prevents full component re-renders when other unused state properties update
+  const isExpanded = useMentorStore((s) => s.isExpanded);
+  const isPulsing = useMentorStore((s) => s.isPulsing);
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const toggleExpanded = useMentorStore((s) => s.toggleExpanded);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
