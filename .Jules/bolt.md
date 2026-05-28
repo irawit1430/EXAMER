@@ -1,0 +1,3 @@
+## 2024-05-24 - Prevent severe application-wide re-render bottlenecks from Zustand stores
+**Learning:** The `streamBuffer` property in `useMentorStore` updates continuously on every token chunk during AI streaming. Destructuring the store object (e.g. `const { currentDialogue } = useMentorStore()`) rather than using fine-grained selectors subscribes the entire component to all store changes. Because `GlobalMentor` is present globally, destructuring the store caused continuous re-rendering of the layout whenever any token streamed in.
+**Action:** Always use fine-grained individual selectors (e.g. `useStore(state => state.prop)`) instead of destructuring, especially for stores with frequently updating properties like token streams.
