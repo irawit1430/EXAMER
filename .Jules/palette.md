@@ -1,0 +1,3 @@
+## 2024-06-25 - Active Recall Accessibility Improvements
+**Learning:** For interactive quiz options acting as toggleable selections within the study engine, it's critical to use `aria-pressed` to communicate selection state to screen readers, and dynamic explanations that appear after selection need `aria-live="polite"` containers so they are read audibly without user intervention.
+**Action:** When creating custom toggle options or revealing dynamic feedback elements in the Examer design system, ensure `aria-pressed` or `aria-expanded` attributes reflect the state and that new feedback text is wrapped in an `aria-live` region.
