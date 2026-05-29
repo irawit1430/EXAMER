@@ -1,0 +1,4 @@
+
+## 2024-05-18 - [Accessible Interactive Toggles and Revealed Content]
+**Learning:** For interactive options like quiz elements that act as toggleable selections, using the `aria-pressed` attribute helps communicate the selected state clearly to screen readers. Furthermore, buttons that toggle dynamically revealed content (like explanations or feedback) should use the `aria-expanded` attribute, and the dynamically revealed content should be wrapped in an `aria-live="polite"` region. This ensures screen reader users are audibly notified of the state change and new content without interrupting their experience.
+**Action:** Always add `aria-expanded` and an `aria-live="polite"` wrapper for expanding/collapsing content (like accordions or explanations), and use `aria-pressed` for selectable toggles in custom components.
