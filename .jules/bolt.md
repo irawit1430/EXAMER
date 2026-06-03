@@ -5,3 +5,7 @@
 ## 2024-05-20 - [Zustand Store Re-render Optimization in useActiveRecall and StudyPage]
 **Learning:** Calling a Zustand store hook like `useStudyStore()` without a selector returns the entire state object. This causes the component using the hook to re-render whenever ANY property in the store changes, even properties it doesn't use. This is particularly problematic in hooks like `useActiveRecall` and components like `StudyPage` where the timer updates every second.
 **Action:** Used fine-grained individual selectors (e.g., `const prop = useStudyStore(state => state.prop)`) instead of destructuring the store object (e.g., `const { prop } = useStudyStore()`) to prevent unnecessary component re-renders when other state in the store changes.
+
+## 2024-06-03 - [Zustand Store Re-render Optimization in useMentorStore]
+**Learning:** Calling a Zustand store hook like `useMentorStore()` and destructuring properties (e.g., `const { isStreaming } = useMentorStore()`) causes the component to re-render whenever ANY property in the store changes. This is extremely detrimental for performance when a store contains high-frequency state updates, such as the `streamBuffer` which updates continuously on every token chunk during AI streaming.
+**Action:** Always use fine-grained individual selectors (e.g., `const prop = useMentorStore(state => state.prop)`) instead of destructuring the store object. This ensures the component only subscribes to changes in the specifically selected properties, preventing severe application-wide re-render bottlenecks.
