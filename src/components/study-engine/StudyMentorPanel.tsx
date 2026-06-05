@@ -19,12 +19,12 @@ export default function StudyMentorPanel() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    addUserMessage,
-  } = useMentorStore();
+
+  // ⚡ BOLT: Use fine-grained selectors to prevent re-renders when streamBuffer updates continuously
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);

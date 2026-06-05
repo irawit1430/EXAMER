@@ -20,16 +20,16 @@ export default function GlobalMentor() {
   const pathname = usePathname();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    isExpanded,
-    isPulsing,
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    toggleExpanded,
-    dismissMentor,
-    addUserMessage,
-  } = useMentorStore();
+
+  // ⚡ BOLT: Use fine-grained selectors to prevent re-renders when streamBuffer updates continuously
+  const isExpanded = useMentorStore((s) => s.isExpanded);
+  const isPulsing = useMentorStore((s) => s.isPulsing);
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const toggleExpanded = useMentorStore((s) => s.toggleExpanded);
+  const dismissMentor = useMentorStore((s) => s.dismissMentor);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
