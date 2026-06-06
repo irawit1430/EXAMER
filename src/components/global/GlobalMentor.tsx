@@ -20,16 +20,14 @@ export default function GlobalMentor() {
   const pathname = usePathname();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    isExpanded,
-    isPulsing,
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    toggleExpanded,
-    dismissMentor,
-    addUserMessage,
-  } = useMentorStore();
+  const isExpanded = useMentorStore((state) => state.isExpanded);
+  const isPulsing = useMentorStore((state) => state.isPulsing);
+  const currentDialogue = useMentorStore((state) => state.currentDialogue);
+  const dialogueHistory = useMentorStore((state) => state.dialogueHistory);
+  const isStreaming = useMentorStore((state) => state.isStreaming);
+  const toggleExpanded = useMentorStore((state) => state.toggleExpanded);
+  const dismissMentor = useMentorStore((state) => state.dismissMentor);
+  const addUserMessage = useMentorStore((state) => state.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
