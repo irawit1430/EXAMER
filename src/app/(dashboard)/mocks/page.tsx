@@ -54,7 +54,9 @@ const fallbackMockTests = [
 ];
 
 export default function MocksPage() {
-  const { user, profile } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+
   const [tests, setTests] = useState<MockTest[]>([]);
   const [conceptsMastered, setConceptsMastered] = useState(0);
   const [loading, setLoading] = useState(true);
