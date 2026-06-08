@@ -137,7 +137,39 @@ async function handleWhatsAppMessageBackground(from: string, msgBody: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+    if (!WHATSAPP_APP_SECRET) {
+      console.error("Critical Configuration Error: WHATSAPP_APP_SECRET is not set.");
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+
+    const signatureHeader = req.headers.get("x-hub-signature-256");
+    if (!signatureHeader) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const rawBody = await req.text();
+
+    // Extract signature, explicitly stripping "sha256="
+    const expectedSignature = signatureHeader.replace(/^sha256=/, "");
+
+    // Compute HMAC
+    const computedHmac = crypto
+      .createHmac("sha256", WHATSAPP_APP_SECRET)
+      .update(rawBody)
+      .digest("hex");
+
+    // Securely compare the expected and computed HMACs
+    // Hash both to ensure equal length for timingSafeEqual as per guidelines
+    const expectedHash = crypto.createHash("sha256").update(expectedSignature).digest();
+    const computedHash = crypto.createHash("sha256").update(computedHmac).digest();
+
+    if (!crypto.timingSafeEqual(expectedHash, computedHash)) {
+      console.warn("WhatsApp Webhook Signature Verification Failed.");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
 
     // Verify it's from the expected WhatsApp API structure
     if (body.object) {
