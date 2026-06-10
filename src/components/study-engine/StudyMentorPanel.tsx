@@ -19,12 +19,14 @@ export default function StudyMentorPanel() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const user = useAuthStore((s) => s.user);
-  const {
-    currentDialogue,
-    dialogueHistory,
-    isStreaming,
-    addUserMessage,
-  } = useMentorStore();
+
+  // ⚡ Bolt: Destructuring the entire store object causes re-renders whenever ANY property
+  // in the store changes (e.g., the rapidly changing streamBuffer).
+  // Use fine-grained selectors to only re-render on the exact state changes this component needs.
+  const currentDialogue = useMentorStore((s) => s.currentDialogue);
+  const dialogueHistory = useMentorStore((s) => s.dialogueHistory);
+  const isStreaming = useMentorStore((s) => s.isStreaming);
+  const addUserMessage = useMentorStore((s) => s.addUserMessage);
 
   const [userInput, setUserInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
