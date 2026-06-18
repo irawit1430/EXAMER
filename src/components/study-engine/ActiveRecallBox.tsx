@@ -88,7 +88,8 @@ export default function ActiveRecallBox({
               key={option.id}
               onClick={() => handleSelect(option.id)}
               disabled={isRevealed}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left
+              aria-pressed={selectedOption === option.id}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary
                 transition-all duration-200 group ${getOptionStyle(option.id)}`}
             >
               <span
