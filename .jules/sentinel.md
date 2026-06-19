@@ -7,3 +7,8 @@
 **Vulnerability:** Comparing sensitive strings (like webhook verification tokens) using standard equality operators (`===`) can expose the application to timing attacks. An attacker can infer the token's value or length by measuring the time it takes for the comparison to fail.
 **Learning:** `crypto.timingSafeEqual` should be used for constant-time comparisons. However, it requires both buffers to have the exact same `byteLength`. Simply checking `token.length === SECRET.length` is insufficient because `.length` on a string checks the character count, not the byte length, leading to unhandled `TypeError` exceptions if multi-byte characters are used.
 **Prevention:** To safely use `crypto.timingSafeEqual` with strings of potentially differing lengths, hash both the expected token and the provided token first (e.g., with SHA-256) and compare the resulting fixed-length hashes.
+
+## 2024-06-05 - [Missing Payload Signature Verification on Webhooks]
+**Vulnerability:** The WhatsApp webhook `POST` endpoint was processing unauthenticated payloads. An attacker could spoof webhook events because there was no cryptographic verification of the `x-hub-signature-256` header against the incoming raw payload.
+**Learning:** For unauthenticated webhook endpoints receiving data from external services, the payload signature must ALWAYS be verified using the raw request body and the expected HMAC before processing any data.
+**Prevention:** Always use `await req.text()` to read the raw body, calculate the expected signature using the shared secret (`WHATSAPP_APP_SECRET`), and safely compare it with the received signature header using `crypto.timingSafeEqual` (ensuring both are hashed first to prevent byte length mismatches) before parsing the payload via `JSON.parse`.
