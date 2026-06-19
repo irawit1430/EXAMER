@@ -155,6 +155,7 @@ export default function Sidebar({
         {/* Collapse Toggle (Desktop Only) */}
         <button
           type="button"
+          aria-expanded={!collapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={onToggle}
           className="hidden md:flex items-center justify-center h-12 border-t border-border-default
