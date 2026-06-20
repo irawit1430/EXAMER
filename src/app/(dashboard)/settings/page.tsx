@@ -19,7 +19,10 @@ import { updateUserSettings } from "@/lib/firebase/firestore";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const { user, profile, signOut, updateProfile } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+  const signOut = useAuthStore((s) => s.signOut);
+  const updateProfile = useAuthStore((s) => s.updateProfile);
   const router = useRouter();
 
   // Initialize from profile
