@@ -36,7 +36,8 @@ export default function Step4StudyTime({ data, updateData }: Props) {
           <button
             key={time.value}
             onClick={() => updateData({ dailyStudyTime: time.value })}
-            className={`p-4 rounded-xl border-2 flex items-center text-left transition-all duration-300 min-h-[80px] ${
+            aria-pressed={data.dailyStudyTime === time.value}
+            className={`p-4 rounded-xl border-2 flex items-center text-left transition-all duration-300 min-h-[80px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
               data.dailyStudyTime === time.value
                 ? "border-brand-primary bg-brand-primary/5 shadow-sm scale-[1.02]"
                 : "border-border-default hover:border-border-subtle hover:bg-surface-50 hover:shadow-sm"

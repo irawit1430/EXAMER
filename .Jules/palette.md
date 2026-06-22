@@ -1,0 +1,3 @@
+## 2024-06-25 - ARIA attributes and Focus Styles on Selectable Cards
+**Learning:** For interactive options acting as selectable cards (like in the Onboarding Flow), communicating state strictly with standard `aria-pressed` values alongside dynamic CSS ensures proper screen reader accessibility. Consistent keyboard focus utilities (like `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary`) must also be applied.
+**Action:** Always add `aria-pressed` based on dynamic toggle state, and verify `focus-visible` ring styles are configured for full keyboard navigation support across custom components acting as option buttons.
