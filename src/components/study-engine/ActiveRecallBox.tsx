@@ -88,7 +88,8 @@ export default function ActiveRecallBox({
               key={option.id}
               onClick={() => handleSelect(option.id)}
               disabled={isRevealed}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left
+              aria-pressed={selectedOption === option.id}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary
                 transition-all duration-200 group ${getOptionStyle(option.id)}`}
             >
               <span
@@ -124,7 +125,7 @@ export default function ActiveRecallBox({
 
         {/* Explanation (after reveal) */}
         {isRevealed && (
-          <div className="p-5 rounded-2xl bg-surface-100 border border-border-subtle mb-6 animate-fade-in">
+          <div className="p-5 rounded-2xl bg-surface-100 border border-border-subtle mb-6 animate-fade-in" aria-live="polite">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
               Explanation
             </p>
