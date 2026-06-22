@@ -177,7 +177,8 @@ export default function Step2MCQTest({ data, updateData, onComplete }: Props) {
                 <button
                   key={idx}
                   onClick={() => handleSelect(idx)}
-                  className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                  aria-pressed={selectedOption === idx}
+                  className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
                     selectedOption === idx
                       ? "border-brand-primary bg-brand-primary/5 shadow-sm scale-[1.01]"
                       : "border-border-default hover:border-brand-primary/40 hover:bg-surface-50"
