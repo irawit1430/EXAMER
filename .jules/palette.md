@@ -1,4 +1,7 @@
+## 2024-05-18 - Accessibility Improvements for Interactive Messages
+**Learning:** Interactive components returned from the AI mentor (Concept Cards, MCQ checks, Feedback cards) use custom button toggles and dynamically revealed content. Screen readers struggle with AnimatePresence conditionally rendering content and interactive list options lacking pressed states.
+**Action:** Always add `aria-expanded` and standard `focus-visible` to custom toggle buttons. Wrap dynamically revealed animated content with an `aria-live="polite"` container *outside* the AnimatePresence block. Use `aria-pressed` for selectable list options.
 
-## 2024-04-25 - Icon-only Buttons and Default Focus Styles
-**Learning:** In the `examer` design system, the default `<button>` component and raw HTML buttons (like the `Modal` and `Sidebar` close buttons) lack inherent keyboard `focus-visible` styles. Furthermore, icon-only buttons often omit the essential `aria-label` attribute, making them completely inaccessible to screen readers.
-**Action:** Always append `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary` to any interactive element that lacks a focus state, and explicitly add `aria-label` attributes to any button where the child content is purely decorative or an icon component (e.g., `<X />`).
+## 2024-05-18 - Semantic Toggles for Interactive Options
+**Learning:** For interactive multiple choice options, using `aria-pressed` technically implies a toggle button. However, for mutually exclusive selections, `role="radio"` combined with `aria-checked` provides better semantic clarity to screen readers than `aria-pressed`. This distinction between a toggle vs. an exclusive choice is critical for accessible forms.
+**Action:** When implementing single-select interactive options (like MCQs), prioritize using `role="radio"` and `aria-checked` over `aria-pressed`.
