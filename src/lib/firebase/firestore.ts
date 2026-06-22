@@ -791,15 +791,19 @@ export async function getDashboardStats(uid: string): Promise<{
   averageSpeed: number;
   totalQuestionsAttempted: number;
 }> {
-  // Get aggregated progress stats
+  // ⚡ Bolt: Execute independent queries concurrently to reduce latency
+  const [progressStats, todaySessions, allSessions] = await Promise.all([
+    getProgressStats(uid),
+    getTodaysStudySessions(uid),
+    getStudySessions(uid, 1000),
+  ]);
+
   const { conceptsLearned, conceptsMastered, totalCorrect, totalAttempts } =
-    await getProgressStats(uid);
+    progressStats;
 
   const overallAccuracy =
     totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  // Get today's sessions
-  const todaySessions = await getTodaysStudySessions(uid);
   let todayStudyMs = 0;
   for (const s of todaySessions) {
     if (s.endTime) {
@@ -811,8 +815,6 @@ export async function getDashboardStats(uid: string): Promise<{
   }
   const todayStudyMinutes = Math.round(todayStudyMs / (1000 * 60));
 
-  // Get all sessions for total hours
-  const allSessions = await getStudySessions(uid, 1000);
   let totalStudyMs = 0;
   for (const s of allSessions) {
     if (s.endTime) {
