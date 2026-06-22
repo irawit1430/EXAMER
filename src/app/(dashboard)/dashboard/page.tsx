@@ -122,25 +122,43 @@ export default function DashboardPage() {
           getWeeklySpeedAccuracy(user.uid),
         ]);
 
-        // Build today's plan from syllabus tree (first few concepts)
-        const todaysPlan: DashboardData["todaysPlan"] = [];
+        // Pre-calculate flattened concepts and lookup map for O(1) retrieval
+        const flatConcepts: Array<{ id: string; name: string; subjectName: string }> = [];
+        const conceptLookup = new Map<string, string>();
+
         if (syllabusTree?.tree) {
-          planLoop: for (const subject of syllabusTree.tree) {
+          for (const subject of syllabusTree.tree) {
             for (const topic of subject.topics || []) {
               for (const subTopic of topic.subTopics || []) {
                 for (const mc of subTopic.microConcepts || []) {
-                  todaysPlan.push({
-                    id: mc.id || mc.name,
-                    concept: mc.name,
-                    subject: subject.name,
-                    status: "new" as const,
-                    time: "—",
+                  const id = mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-") || "";
+                  if (!id) continue;
+
+                  const fullName = `${subject.name} — ${mc.name}`;
+                  conceptLookup.set(id, fullName);
+
+                  flatConcepts.push({
+                    id,
+                    name: mc.name || "",
+                    subjectName: subject.name || ""
                   });
-                  if (todaysPlan.length >= 4) break planLoop;
                 }
               }
             }
           }
+        }
+
+        // Build today's plan from syllabus tree (first few concepts)
+        const todaysPlan: DashboardData["todaysPlan"] = [];
+        for (let i = 0; i < Math.min(4, flatConcepts.length); i++) {
+          const mc = flatConcepts[i];
+          todaysPlan.push({
+            id: mc.id,
+            concept: mc.name,
+            subject: mc.subjectName,
+            status: "new" as const,
+            time: "—",
+          });
         }
 
         // If no syllabus, use default plan
@@ -164,26 +182,9 @@ export default function DashboardPage() {
           }
         }
 
-        // Enrich weak topics with concept names from syllabus
+        // Enrich weak topics with concept names from syllabus using O(1) lookup
         const enrichedWeakTopics = weakTopics.map((wt) => {
-          let name = wt.conceptId;
-          if (syllabusTree?.tree) {
-            searchLoop: for (const subject of syllabusTree.tree) {
-              for (const topic of subject.topics || []) {
-                for (const subTopic of topic.subTopics || []) {
-                  for (const mc of subTopic.microConcepts || []) {
-                    if (
-                      (mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-")) ===
-                      wt.conceptId
-                    ) {
-                      name = `${subject.name} — ${mc.name}`;
-                      break searchLoop;
-                    }
-                  }
-                }
-              }
-            }
-          }
+          const name = conceptLookup.get(wt.conceptId) || wt.conceptId;
           return { name, mastery: wt.mastery, attempts: wt.attempts };
         });
 
