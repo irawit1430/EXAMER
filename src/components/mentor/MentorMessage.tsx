@@ -315,7 +315,9 @@ function MCQCard({
             <button
               key={opt.label}
               onClick={() => handleSelect(opt.label)}
+              aria-pressed={selected === opt.label}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary
                 ${selected === opt.label
                   ? "border-brand-accent/50 bg-brand-accent/5 shadow-sm ring-1 ring-brand-accent/20"
                   : "border-border-subtle hover:border-amber-300/60 hover:bg-white/60"
@@ -407,7 +409,8 @@ function FeedbackCard({
         <>
           <button
             onClick={() => setShowExplanation(!showExplanation)}
-            className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors border-t ${
+            aria-expanded={showExplanation}
+            className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors border-t focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
               correct
                 ? "border-green-200/40 text-green-700 hover:bg-green-50/60"
                 : "border-red-200/40 text-red-700 hover:bg-red-50/60"
@@ -423,6 +426,7 @@ function FeedbackCard({
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
+                aria-live="polite"
               >
                 <div className={`px-4 pb-4 ${fullPage ? "text-[14px]" : "text-[12px]"} text-text-secondary leading-relaxed`}>
                   <ReactMarkdown>{explanation}</ReactMarkdown>
