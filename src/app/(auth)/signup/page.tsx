@@ -131,10 +131,14 @@ export default function SignupPage() {
           <div className="grid grid-cols-2 gap-3">
             {/* Name */}
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+              <label
+                htmlFor="name"
+                className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block"
+              >
                 Full Name
               </label>
               <input
+                id="name"
                 type="text"
                 value={form.name}
                 onChange={(e) => updateField("name", e.target.value)}
@@ -148,10 +152,14 @@ export default function SignupPage() {
 
             {/* Target Score */}
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+              <label
+                htmlFor="targetScore"
+                className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block"
+              >
                 Target Score
               </label>
               <input
+                id="targetScore"
                 type="number"
                 value={form.targetScore}
                 onChange={(e) => updateField("targetScore", e.target.value)}
@@ -168,10 +176,14 @@ export default function SignupPage() {
 
           {/* Email */}
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label
+              htmlFor="email"
+              className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block"
+            >
               Email address
             </label>
             <input
+              id="email"
               type="email"
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
@@ -185,11 +197,15 @@ export default function SignupPage() {
 
           {/* Password */}
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label
+              htmlFor="password"
+              className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block"
+            >
               Password
             </label>
             <div className="relative">
               <input
+                id="password"
                 type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => updateField("password", e.target.value)}
