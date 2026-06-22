@@ -122,25 +122,46 @@ export default function DashboardPage() {
           getWeeklySpeedAccuracy(user.uid),
         ]);
 
-        // Build today's plan from syllabus tree (first few concepts)
-        const todaysPlan: DashboardData["todaysPlan"] = [];
+        // Pre-calculate flat concepts and lookup map to optimize O(N*M) tree traversals
+        // into an O(N) single pass and O(1) lookups.
+        const flatConcepts: Array<{
+          id: string;
+          name: string;
+          subject: string;
+        }> = [];
+        const conceptLookup = new Map<string, string>();
+
         if (syllabusTree?.tree) {
-          planLoop: for (const subject of syllabusTree.tree) {
+          for (const subject of syllabusTree.tree) {
             for (const topic of subject.topics || []) {
               for (const subTopic of topic.subTopics || []) {
                 for (const mc of subTopic.microConcepts || []) {
-                  todaysPlan.push({
-                    id: mc.id || mc.name,
-                    concept: mc.name,
+                  const id =
+                    mc.id ||
+                    mc.name?.toLowerCase().replace(/\s+/g, "-") ||
+                    mc.name;
+                  flatConcepts.push({
+                    id,
+                    name: mc.name,
                     subject: subject.name,
-                    status: "new" as const,
-                    time: "—",
                   });
-                  if (todaysPlan.length >= 4) break planLoop;
+                  conceptLookup.set(id, `${subject.name} — ${mc.name}`);
                 }
               }
             }
           }
+        }
+
+        // Build today's plan from flattened concepts (first few)
+        const todaysPlan: DashboardData["todaysPlan"] = [];
+        for (const mc of flatConcepts.slice(0, 4)) {
+          todaysPlan.push({
+            id: mc.id,
+            concept: mc.name,
+            subject: mc.subject,
+            status: "new" as const,
+            time: "—",
+          });
         }
 
         // If no syllabus, use default plan
@@ -164,26 +185,9 @@ export default function DashboardPage() {
           }
         }
 
-        // Enrich weak topics with concept names from syllabus
+        // Enrich weak topics using O(1) map lookup instead of nested loops
         const enrichedWeakTopics = weakTopics.map((wt) => {
-          let name = wt.conceptId;
-          if (syllabusTree?.tree) {
-            searchLoop: for (const subject of syllabusTree.tree) {
-              for (const topic of subject.topics || []) {
-                for (const subTopic of topic.subTopics || []) {
-                  for (const mc of subTopic.microConcepts || []) {
-                    if (
-                      (mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-")) ===
-                      wt.conceptId
-                    ) {
-                      name = `${subject.name} — ${mc.name}`;
-                      break searchLoop;
-                    }
-                  }
-                }
-              }
-            }
-          }
+          const name = conceptLookup.get(wt.conceptId) || wt.conceptId;
           return { name, mastery: wt.mastery, attempts: wt.attempts };
         });
 
@@ -328,9 +332,7 @@ export default function DashboardPage() {
 
         {/* Quick Stats Grid */}
         <div className="xl:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <BookOpen className="w-4 h-4 text-text-secondary" />
             </div>
@@ -344,9 +346,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <Clock className="w-4 h-4 text-text-secondary" />
             </div>
@@ -361,9 +361,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <Target className="w-4 h-4 text-text-secondary" />
             </div>
@@ -378,9 +376,7 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          <Card
-            className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl"
-          >
+          <Card className="flex flex-col mb-0 justify-between p-4 bg-white border border-border-default rounded-xl">
             <div className="w-8 h-8 rounded-lg bg-surface-50 flex items-center justify-center border border-border-default mb-3">
               <TrendingUp className="w-4 h-4 text-text-secondary" />
             </div>
