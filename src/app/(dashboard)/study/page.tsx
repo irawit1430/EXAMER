@@ -190,6 +190,44 @@ export default function StudyPage() {
     };
   }, []);
 
+  // Memoize flattened structural concepts from syllabus tree
+  const baseConcepts = useMemo(() => {
+    if (!syllabusTree?.tree || syllabusTree.tree.length === 0) return [];
+
+    return syllabusTree.tree.flatMap((subject) => {
+      const subjName = subject.subjectName || subject.name || "Unknown Subject";
+      const subjectId =
+        subject.id || subjName.toLowerCase().replace(/\s+/g, "-") || "unknown";
+
+      return (subject.topics || []).flatMap((topic) => {
+        const topicId =
+          topic.id ||
+          topic.name?.toLowerCase().replace(/\s+/g, "-") ||
+          "unknown";
+
+        return (topic.subTopics || []).flatMap((subTopic) => {
+          return (subTopic.microConcepts || []).map((mc) => {
+            const conceptId =
+              mc.id || mc.name?.toLowerCase().replace(/\s+/g, "-") || "unknown";
+            return {
+              concept: {
+                id: conceptId,
+                name: mc.name,
+                content:
+                  mc.content ||
+                  `Study material for: ${mc.name}\n\nThis concept is part of ${subTopic.name} under ${topic.name} in ${subject.name}.`,
+                difficulty: mc.difficulty || 2,
+              },
+              subject: subjName,
+              subjectId,
+              topicId,
+            };
+          });
+        });
+      });
+    });
+  }, [syllabusTree]);
+
   // Build concepts from syllabus tree + progress nodes
   useEffect(() => {
     async function loadConcepts() {
@@ -212,56 +250,25 @@ export default function StudyPage() {
 
       // If syllabus tree exists, build concept list from it
       if (syllabusTree && syllabusTree.tree && syllabusTree.tree.length > 0) {
-        const items: ConceptItem[] = [];
-
-        for (const subject of syllabusTree.tree) {
-          const subjName =
-            subject.subjectName || subject.name || "Unknown Subject";
-          const subjectId =
-            subject.id ||
-            subjName.toLowerCase().replace(/\s+/g, "-") ||
-            "unknown";
-          for (const topic of subject.topics || []) {
-            const topicId =
-              topic.id ||
-              topic.name?.toLowerCase().replace(/\s+/g, "-") ||
-              "unknown";
-            for (const subTopic of topic.subTopics || []) {
-              for (const mc of subTopic.microConcepts || []) {
-                const conceptId =
-                  mc.id ||
-                  mc.name?.toLowerCase().replace(/\s+/g, "-") ||
-                  "unknown";
-                const progress = progressMap[conceptId];
-
-                items.push({
-                  concept: {
-                    id: conceptId,
-                    name: mc.name,
-                    content:
-                      progress?.cachedContent ||
-                      mc.content ||
-                      `Study material for: ${mc.name}\n\nThis concept is part of ${subTopic.name} under ${topic.name} in ${subject.name}.`,
-                    difficulty: mc.difficulty || 2,
-                  },
-                  subject: subjName,
-                  subjectId,
-                  topicId,
-                  status: progress?.status || "new",
-                  mastery: progress
-                    ? progress.totalAttempts > 0
-                      ? Math.round(
-                          (progress.correctCount / progress.totalAttempts) *
-                            100,
-                        )
-                      : 0
-                    : 0,
-                  mistakes: progress?.mistakeCount || 0,
-                });
-              }
-            }
-          }
-        }
+        const items: ConceptItem[] = baseConcepts.map((base) => {
+          const progress = progressMap[base.concept.id];
+          return {
+            ...base,
+            concept: {
+              ...base.concept,
+              content: progress?.cachedContent || base.concept.content,
+            },
+            status: progress?.status || "new",
+            mastery: progress
+              ? progress.totalAttempts > 0
+                ? Math.round(
+                    (progress.correctCount / progress.totalAttempts) * 100,
+                  )
+                : 0
+              : 0,
+            mistakes: progress?.mistakeCount || 0,
+          };
+        });
 
         if (items.length > 0) {
           // Sort: new → learning → review → mastered
@@ -544,8 +551,6 @@ export default function StudyPage() {
 
         await saveProgressNode(user.uid, {
           conceptId: selectedConcept.concept.id,
-          subjectId: selectedConcept.subjectId,
-          topicId: selectedConcept.topicId,
           status,
           correctCount,
           totalAttempts,
@@ -556,7 +561,7 @@ export default function StudyPage() {
             status === "review_24h"
               ? new Date(Date.now() + 24 * 60 * 60 * 1000)
               : undefined,
-        } as Parameters<typeof saveProgressNode>[2]);
+        } as Parameters<typeof saveProgressNode>[1]);
       } catch (err) {
         console.error("Error saving progress:", err);
       }
