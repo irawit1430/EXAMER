@@ -87,13 +87,19 @@ export default function SettingsPage() {
   const Toggle = ({
     checked,
     onChange,
+    "aria-label": ariaLabel,
   }: {
     checked: boolean;
     onChange: (val: boolean) => void;
+    "aria-label"?: string;
   }) => (
     <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
       onClick={() => onChange(!checked)}
-      className={`w-12 h-7 rounded-full transition-colors flex items-center px-1
+      className={`w-12 h-7 rounded-full transition-colors flex items-center px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2
         ${checked ? "bg-success" : "bg-surface-300"}`}
     >
       <div
@@ -217,7 +223,11 @@ export default function SettingsPage() {
                   {item.desc}
                 </p>
               </div>
-              <Toggle checked={item.default} onChange={() => {}} />{" "}
+              <Toggle
+                checked={item.default}
+                onChange={() => {}}
+                aria-label={`Toggle ${item.title}`}
+              />{" "}
               {/* Placeholder onChange */}
             </div>
           ))}
@@ -238,7 +248,11 @@ export default function SettingsPage() {
               Switch to dark theme
             </p>
           </div>
-          <Toggle checked={darkMode} onChange={setDarkMode} />
+          <Toggle
+            checked={darkMode}
+            onChange={setDarkMode}
+            aria-label="Toggle Dark Mode"
+          />
         </div>
       </Card>
 
