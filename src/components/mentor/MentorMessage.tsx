@@ -246,6 +246,7 @@ function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolea
     >
       <button
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
         className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-blue-50/50 transition-colors"
       >
         <div className="w-8 h-8 rounded-xl bg-brand-accent/10 flex items-center justify-center flex-shrink-0">
@@ -315,6 +316,7 @@ function MCQCard({
             <button
               key={opt.label}
               onClick={() => handleSelect(opt.label)}
+              aria-pressed={selected === opt.label}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150
                 ${selected === opt.label
                   ? "border-brand-accent/50 bg-brand-accent/5 shadow-sm ring-1 ring-brand-accent/20"
@@ -407,6 +409,7 @@ function FeedbackCard({
         <>
           <button
             onClick={() => setShowExplanation(!showExplanation)}
+            aria-expanded={showExplanation}
             className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors border-t ${
               correct
                 ? "border-green-200/40 text-green-700 hover:bg-green-50/60"
