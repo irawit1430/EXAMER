@@ -11,7 +11,11 @@ export class PlannerAgent extends AgentRuntime {
   constructor() {
     super({
       systemInstruction: PLANNER_INSTRUCTION,
-      allowedTools: ["fetch_syllabus_topic", "get_recent_activity", "log_important_memory"],
+      allowedTools: [
+        "fetch_syllabus_topic",
+        "get_recent_activity",
+        "log_important_memory",
+      ],
       temperature: 0.6,
     });
   }

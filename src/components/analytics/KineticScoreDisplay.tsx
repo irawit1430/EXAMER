@@ -114,7 +114,9 @@ export default function KineticScoreDisplay({
         </div>
         <div className="flex justify-between mt-2">
           <span className="text-[10px] font-medium text-text-muted">Min</span>
-          <span className="text-[10px] font-medium text-text-muted">Target {maxScore}</span>
+          <span className="text-[10px] font-medium text-text-muted">
+            Target {maxScore}
+          </span>
         </div>
       </div>
     </div>

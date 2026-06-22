@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         message || "",
         context,
         trigger,
-        targetAgent
+        targetAgent,
       );
 
       // --- Return SSE stream ---

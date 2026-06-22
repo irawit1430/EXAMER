@@ -13,7 +13,12 @@ export class StudyMentorAgent extends AgentRuntime {
   constructor() {
     super({
       systemInstruction: MENTOR_INSTRUCTION,
-      allowedTools: ["fetch_syllabus_topic", "log_important_memory", "get_recent_activity", "get_mentor_memories"],
+      allowedTools: [
+        "fetch_syllabus_topic",
+        "log_important_memory",
+        "get_recent_activity",
+        "get_mentor_memories",
+      ],
       temperature: 0.7,
     });
   }

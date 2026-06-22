@@ -4,7 +4,15 @@ import React, { useState, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import { FileText, Clock, Target, Play, Lock, Loader2, Sparkles } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  Target,
+  Play,
+  Lock,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   getMockTests,
@@ -54,7 +62,8 @@ const fallbackMockTests = [
 ];
 
 export default function MocksPage() {
-  const { user, profile } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
   const [tests, setTests] = useState<MockTest[]>([]);
   const [conceptsMastered, setConceptsMastered] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -110,7 +119,7 @@ export default function MocksPage() {
 
       if (!res.ok) throw new Error("Failed to generate mock tests");
       const generatedTests = await res.json();
-      
+
       // Cache them to firestore
       await saveMockTests(user.uid, generatedTests);
       setTests(generatedTests);
@@ -131,14 +140,20 @@ export default function MocksPage() {
             Mock Tests
           </h1>
           <p className="text-sm font-medium text-text-secondary mt-2">
-            Simulate full exam conditions. Your predicted score updates after each
-            mock.
+            Simulate full exam conditions. Your predicted score updates after
+            each mock.
           </p>
         </div>
-        <Button 
-          onClick={handleGenerate} 
+        <Button
+          onClick={handleGenerate}
           disabled={generating}
-          icon={generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          icon={
+            generating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )
+          }
           className="flex-shrink-0"
         >
           {generating ? "Generating..." : "Generate AI Mocks"}

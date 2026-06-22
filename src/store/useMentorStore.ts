@@ -191,7 +191,12 @@ export const useMentorStore = create<MentorState>((set, get) => ({
       ...(isFullPage ? { isVisible: true, isExpanded: true } : {}),
       // Start session timer if entering full page for first time
       ...(isFullPage && !get().sessionContext.sessionStartTime
-        ? { sessionContext: { ...get().sessionContext, sessionStartTime: Date.now() } }
+        ? {
+            sessionContext: {
+              ...get().sessionContext,
+              sessionStartTime: Date.now(),
+            },
+          }
         : {}),
     });
   },
@@ -218,7 +223,11 @@ export const useMentorStore = create<MentorState>((set, get) => ({
       triggerReason: null,
       interruptFlag: false,
       lastTriggerTime: null,
-      sessionContext: { currentTopic: null, sessionStartTime: null, messagesCount: 0 },
+      sessionContext: {
+        currentTopic: null,
+        sessionStartTime: null,
+        messagesCount: 0,
+      },
     });
   },
 }));

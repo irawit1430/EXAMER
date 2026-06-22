@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ai } from "@/lib/gemini/client";
-import { getVerifiedUidFromRequest, FirebaseAuthError } from "@/lib/firebase/auth-server";
+import {
+  getVerifiedUidFromRequest,
+  FirebaseAuthError,
+} from "@/lib/firebase/auth-server";
 
 export const runtime = "nodejs"; // Node runtime needed for heavier parsing if using external libs
 
@@ -118,7 +121,10 @@ export async function POST(req: NextRequest) {
     }
   } catch (error: any) {
     if (error instanceof FirebaseAuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
     console.error("\n\n=== SYLLABUS PARSER FATAL ERROR ===\n");
     console.error(error);

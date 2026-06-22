@@ -124,7 +124,8 @@ export class AgentRuntime {
         }
 
         // 2. Build the system instruction with injected context
-        let systemInstruction = this.config.systemInstruction || SYSTEM_INSTRUCTION;
+        let systemInstruction =
+          this.config.systemInstruction || SYSTEM_INSTRUCTION;
         systemInstruction += `\n\n${studentSnapshot}`;
 
         if (event.payload.context) {
@@ -169,7 +170,8 @@ Days to exam: ${ctx.daysToExam}
 
         // 5. Inject tool catalog into system prompt for models without native tool calling
         if (this.config.enableToolCalling) {
-          systemInstruction += "\n\n" + toolRegistry.toPromptDescription(this.config.allowedTools);
+          systemInstruction +=
+            "\n\n" + toolRegistry.toPromptDescription(this.config.allowedTools);
         }
 
         return { systemInstruction, messages, tools };
@@ -405,10 +407,10 @@ Days to exam: ${ctx.daysToExam}
           const navMatch = fullText.match(/NAVIGATE_TO:\s*(\/[^\s]+)/);
           if (navMatch && navMatch[1]) {
             const route = navMatch[1];
-            
+
             // Remove the navigation command from the text shown to the user
             fullText = fullText.replace(/NAVIGATE_TO:\s*\/[^\s]+/, "").trim();
-            
+
             // Send special redirect event (only if not already redirected by tool)
             if (!toolRedirectUrl) {
               controller.enqueue(

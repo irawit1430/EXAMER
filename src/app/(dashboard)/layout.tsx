@@ -22,10 +22,10 @@ export default function DashboardLayout({
         setSidebarCollapsed(false);
       }
     };
-    
+
     // Initial check
     handleResize();
-    
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -47,7 +47,7 @@ export default function DashboardLayout({
         <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8 py-6 overflow-y-auto relative z-0">
           {children}
         </main>
-        
+
         {/* Floating AI Agent anchored to the viewport so it never scrolls out of view */}
         <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none px-3 sm:px-4 md:px-6 lg:px-8 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <div className="w-full max-w-[1440px] mx-auto flex justify-end">
