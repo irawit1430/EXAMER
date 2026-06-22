@@ -135,10 +135,11 @@ export default function SettingsPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="displayName" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Display Name
             </label>
             <input
+              id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -146,10 +147,11 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="targetScore" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Target Score
             </label>
             <input
+              id="targetScore"
               type="number"
               value={targetScore}
               onChange={(e) => setTargetScore(e.target.value)}
@@ -168,10 +170,11 @@ export default function SettingsPage() {
         </h2>
         <div className="space-y-3">
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
+            <label htmlFor="readingDuration" className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5 block">
               Reading Duration (seconds before recall)
             </label>
             <input
+              id="readingDuration"
               type="number"
               value={readingDuration}
               onChange={(e) => setReadingDuration(e.target.value)}
