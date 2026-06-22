@@ -280,6 +280,7 @@ export default function GlobalMentor() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsTall(!isTall); }}
                     className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    aria-pressed={isTall}
                     aria-label={isTall ? "Shrink mentor chat" : "Expand mentor chat height"}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
@@ -289,6 +290,7 @@ export default function GlobalMentor() {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsMuted((value) => !value); }}
                     className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    aria-pressed={isMuted}
                     aria-label={
                       isMuted ? "Unmute mentor voice" : "Mute mentor voice"
                     }

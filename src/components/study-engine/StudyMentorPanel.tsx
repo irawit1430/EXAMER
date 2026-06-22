@@ -244,6 +244,7 @@ export default function StudyMentorPanel() {
             type="button"
             onClick={() => setIsMuted((value) => !value)}
             className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+            aria-pressed={isMuted}
             aria-label={
               isMuted ? "Unmute mentor voice" : "Mute mentor voice"
             }
