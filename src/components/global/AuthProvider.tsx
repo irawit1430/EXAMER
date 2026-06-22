@@ -10,7 +10,10 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { init, initialized, user, profile } = useAuthStore();
+  const init = useAuthStore((s) => s.init);
+  const initialized = useAuthStore((s) => s.initialized);
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
   const setActiveMentorUser = useMentorStore((s) => s.setActiveUser);
   const router = useRouter();
   const pathname = usePathname();
