@@ -16,6 +16,7 @@ import {
   getCountFromServer,
   sum,
   getAggregateFromServer,
+  writeBatch,
 } from "firebase/firestore";
 import { auth, db } from "./config";
 import type {
@@ -615,12 +616,16 @@ export async function getMockTests(userId: string): Promise<MockTest[]> {
 
 export async function saveMockTests(userId: string, tests: MockTest[]): Promise<void> {
   const colRef = collection(db, "users", userId, "mock_tests");
-  await Promise.all(
-    tests.map((test) => {
+  const chunkSize = 500;
+  for (let i = 0; i < tests.length; i += chunkSize) {
+    const chunk = tests.slice(i, i + chunkSize);
+    const batch = writeBatch(db);
+    chunk.forEach((test) => {
       const docRef = doc(colRef, test.id);
-      return setDoc(docRef, test);
-    })
-  );
+      batch.set(docRef, test);
+    });
+    await batch.commit();
+  }
 }
 
 // ============================================================
