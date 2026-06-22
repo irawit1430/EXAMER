@@ -41,7 +41,7 @@ export default function ConceptCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-surface-50 border border-border-subtle p-5 rounded-[20px] shadow-sm hover:shadow-md hover:border-brand-primary/30 transition-all group"
+      className="w-full text-left bg-surface-50 border border-border-subtle p-5 rounded-[20px] shadow-sm hover:shadow-md hover:border-brand-primary/30 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
