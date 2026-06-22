@@ -113,7 +113,7 @@ export class ToolRegistry {
             ...result,
             executionTimeMs: Date.now() - startTime,
           };
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(
             `[ToolRegistry] Error executing tool "${toolName}":`,
             error,
@@ -122,7 +122,10 @@ export class ToolRegistry {
             toolName,
             success: false,
             data: null,
-            error: error.message || "Unknown tool execution error",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Unknown tool execution error",
             executionTimeMs: Date.now() - startTime,
           };
         }
@@ -138,9 +141,13 @@ export class ToolRegistry {
     return Array.from(this.tools.keys());
   }
 
-  toGeminiFunctionDeclarations(allowedTools?: string[]): GeminiFunctionDeclaration[] {
-    const toolsIter = allowedTools 
-      ? Array.from(this.tools.values()).filter(t => allowedTools.includes(t.name))
+  toGeminiFunctionDeclarations(
+    allowedTools?: string[],
+  ): GeminiFunctionDeclaration[] {
+    const toolsIter = allowedTools
+      ? Array.from(this.tools.values()).filter((t) =>
+          allowedTools.includes(t.name),
+        )
       : Array.from(this.tools.values());
 
     return toolsIter.map((tool) => ({
@@ -169,8 +176,10 @@ export class ToolRegistry {
    * can still invoke tools via the XML format we parse in provider.ts.
    */
   toPromptDescription(allowedTools?: string[]): string {
-    const toolsIter = allowedTools 
-      ? Array.from(this.tools.values()).filter(t => allowedTools.includes(t.name))
+    const toolsIter = allowedTools
+      ? Array.from(this.tools.values()).filter((t) =>
+          allowedTools.includes(t.name),
+        )
       : Array.from(this.tools.values());
 
     const toolDescs = toolsIter.map((tool) => {
@@ -340,12 +349,12 @@ Return ONLY valid JSON in this exact format, no markdown fencing:
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           toolName: "generate_mcq",
           success: false,
           data: null,
-          error: `MCQ generation failed: ${error.message}`,
+          error: `MCQ generation failed: ${error instanceof Error ? error.message : String(error)}`,
           executionTimeMs: 0,
         };
       }
@@ -462,12 +471,12 @@ Evaluate the student's answer and return ONLY valid JSON:
           data: evaluation,
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           toolName: "evaluate_user_answer",
           success: false,
           data: null,
-          error: `Answer evaluation failed: ${error.message}`,
+          error: `Answer evaluation failed: ${error instanceof Error ? error.message : String(error)}`,
           executionTimeMs: 0,
         };
       }
@@ -943,12 +952,12 @@ function createGetWeakTopicsTool(): ToolDefinition {
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           toolName: "get_weak_topics",
           success: false,
           data: null,
-          error: `Failed to fetch weak topics: ${error.message}`,
+          error: `Failed to fetch weak topics: ${error instanceof Error ? error.message : String(error)}`,
           executionTimeMs: 0,
         };
       }
@@ -1051,7 +1060,7 @@ function createGetStudyStatsTool(): ToolDefinition {
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (isFirebaseAdminConfigError(error)) {
           return {
             toolName: "get_study_stats",
@@ -1124,7 +1133,7 @@ function createGetRecentActivityTool(): ToolDefinition {
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (isFirebaseAdminConfigError(error)) {
           return {
             toolName: "get_recent_activity",
@@ -1186,7 +1195,7 @@ function createGetMentorMemoriesTool(): ToolDefinition {
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Fallback to local memory
         try {
           const ltm = getLongTermMemory();
@@ -1207,7 +1216,7 @@ function createGetMentorMemoriesTool(): ToolDefinition {
             toolName: "get_mentor_memories",
             success: false,
             data: null,
-            error: `Failed to fetch mentor memories: ${error.message}`,
+            error: `Failed to fetch mentor memories: ${error instanceof Error ? error.message : String(error)}`,
             executionTimeMs: 0,
           };
         }
@@ -1256,7 +1265,7 @@ function createGetMockResultsTool(): ToolDefinition {
           },
           executionTimeMs: 0,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (isFirebaseAdminConfigError(error)) {
           return {
             toolName: "get_mock_test_results",
@@ -1291,11 +1300,27 @@ function createGetMockResultsTool(): ToolDefinition {
 function createRecommendMockTestTool(): ToolDefinition {
   return {
     name: "recommend_mock_test",
-    description: "Generate a custom, targeted mock test link for the student based on their weak topics. Use this when the student asks to take a test, or when you notice they should evaluate their recent progress.",
+    description:
+      "Generate a custom, targeted mock test link for the student based on their weak topics. Use this when the student asks to take a test, or when you notice they should evaluate their recent progress.",
     parameters: {
-      testName: { type: "string", description: "A catchy, custom name for this mock test (e.g., 'Calculus Mastery Challenge').", required: true },
-      subjects: { type: "string", description: "Comma separated subjects or topics to include (e.g., 'Calculus, Algebra').", required: true },
-      questionsCount: { type: "number", description: "Number of questions (e.g., 10 or 15). Keep it to 15 max for quick tests.", required: true }
+      testName: {
+        type: "string",
+        description:
+          "A catchy, custom name for this mock test (e.g., 'Calculus Mastery Challenge').",
+        required: true,
+      },
+      subjects: {
+        type: "string",
+        description:
+          "Comma separated subjects or topics to include (e.g., 'Calculus, Algebra').",
+        required: true,
+      },
+      questionsCount: {
+        type: "number",
+        description:
+          "Number of questions (e.g., 10 or 15). Keep it to 15 max for quick tests.",
+        required: true,
+      },
     },
     requiredParams: ["testName", "subjects", "questionsCount"],
     handler: async (params): Promise<ToolCallResult> => {
@@ -1303,50 +1328,62 @@ function createRecommendMockTestTool(): ToolDefinition {
       const count = Math.min(Number(questionsCount) || 10, 30);
       const testId = `sim-${crypto.randomUUID()}`;
       const url = `/mocks/${testId}?name=${encodeURIComponent(testName)}&subjects=${encodeURIComponent(subjects)}&q=${count}`;
-      
+
       return {
         toolName: "recommend_mock_test",
         success: true,
         data: {
           testUrl: url,
-          instructions: `Tell the user to click this link to start their mock test: ${url}`
+          instructions: `Tell the user to click this link to start their mock test: ${url}`,
         },
-        executionTimeMs: 0
+        executionTimeMs: 0,
       };
-    }
+    },
   };
 }
 
 function createUpdateStudyPreferencesTool(): ToolDefinition {
   return {
     name: "update_study_preferences",
-    description: "Update the student's study preferences dynamically (like target specific exams, increasing daily study time, or changing favorite subjects) and store this in their long-term memory.",
+    description:
+      "Update the student's study preferences dynamically (like target specific exams, increasing daily study time, or changing favorite subjects) and store this in their long-term memory.",
     parameters: {
       userId: { type: "string", description: "The user ID", required: true },
-      preferenceUpdates: { type: "string", description: "Description of what changed (e.g., 'User now wants to focus on JEE Advanced instead of Mains')", required: true }
+      preferenceUpdates: {
+        type: "string",
+        description:
+          "Description of what changed (e.g., 'User now wants to focus on JEE Advanced instead of Mains')",
+        required: true,
+      },
     },
     requiredParams: ["userId", "preferenceUpdates"],
     handler: async (params): Promise<ToolCallResult> => {
       const { userId, preferenceUpdates } = params as any;
       try {
         // Appends to the mentor's explicit long term memory
-        await addImportantMemory(userId, `Preference Update: ${preferenceUpdates}`);
+        await addImportantMemory(
+          userId,
+          `Preference Update: ${preferenceUpdates}`,
+        );
         return {
           toolName: "update_study_preferences",
           success: true,
-          data: { success: true, message: "Preferences updated in memory successfully." },
-          executionTimeMs: 0
+          data: {
+            success: true,
+            message: "Preferences updated in memory successfully.",
+          },
+          executionTimeMs: 0,
         };
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
           toolName: "update_study_preferences",
           success: false,
           data: null,
-          error: err.message,
-          executionTimeMs: 0
+          error: err instanceof Error ? err.message : String(err),
+          executionTimeMs: 0,
         };
       }
-    }
+    },
   };
 }
 
@@ -1373,7 +1410,7 @@ export function getToolRegistry(config?: Partial<AgentConfig>): ToolRegistry {
   _registry.register(createGetRecentActivityTool());
   _registry.register(createGetMentorMemoriesTool());
   _registry.register(createGetMockResultsTool());
-  
+
   // Custom Gaps tools
   _registry.register(createRecommendMockTestTool());
   _registry.register(createUpdateStudyPreferencesTool());
