@@ -40,7 +40,8 @@ export default function OnboardingFlow() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { updateProfile } = useAuthStore();
+  // ⚡ Bolt: Use fine-grained selectors to prevent unnecessary re-renders
+  const updateProfile = useAuthStore((state) => state.updateProfile);
 
   const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, 6));
   const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
