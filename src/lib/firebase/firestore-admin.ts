@@ -397,7 +397,12 @@ export async function getDashboardStats(uid: string): Promise<{
   averageSpeed: number;
   totalQuestionsAttempted: number;
 }> {
-  const progressNodes = await getAllProgressNodes(uid);
+  // Fetch all required data concurrently to reduce latency
+  const [progressNodes, todaySessions, allSessions] = await Promise.all([
+    getAllProgressNodes(uid),
+    getTodaysStudySessions(uid),
+    getStudySessions(uid, 1000),
+  ]);
 
   const conceptsLearned = progressNodes.filter(
     (n) => n.status !== "new",
@@ -411,7 +416,6 @@ export async function getDashboardStats(uid: string): Promise<{
   const overallAccuracy =
     totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  const todaySessions = await getTodaysStudySessions(uid);
   let todayStudyMs = 0;
   for (const s of todaySessions) {
     if (s.endTime) {
@@ -422,8 +426,6 @@ export async function getDashboardStats(uid: string): Promise<{
     }
   }
   const todayStudyMinutes = Math.round(todayStudyMs / (1000 * 60));
-
-  const allSessions = await getStudySessions(uid, 1000);
   let totalStudyMs = 0;
   for (const s of allSessions) {
     if (s.endTime) {
