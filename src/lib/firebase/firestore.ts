@@ -791,15 +791,20 @@ export async function getDashboardStats(uid: string): Promise<{
   averageSpeed: number;
   totalQuestionsAttempted: number;
 }> {
-  // Get aggregated progress stats
-  const { conceptsLearned, conceptsMastered, totalCorrect, totalAttempts } =
-    await getProgressStats(uid);
+  // Optimize: Fetch independent dashboard data concurrently using Promise.all
+  // instead of sequential awaits to significantly reduce network latency.
+  const [progressStats, todaySessions, allSessions] = await Promise.all([
+    getProgressStats(uid),
+    getTodaysStudySessions(uid),
+    getStudySessions(uid, 1000),
+  ]);
+
+  const { conceptsLearned, conceptsMastered, totalCorrect, totalAttempts } = progressStats;
 
   const overallAccuracy =
     totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  // Get today's sessions
-  const todaySessions = await getTodaysStudySessions(uid);
+  // Calculate today's sessions study time
   let todayStudyMs = 0;
   for (const s of todaySessions) {
     if (s.endTime) {
@@ -811,8 +816,7 @@ export async function getDashboardStats(uid: string): Promise<{
   }
   const todayStudyMinutes = Math.round(todayStudyMs / (1000 * 60));
 
-  // Get all sessions for total hours
-  const allSessions = await getStudySessions(uid, 1000);
+  // Calculate total hours from all sessions
   let totalStudyMs = 0;
   for (const s of allSessions) {
     if (s.endTime) {
