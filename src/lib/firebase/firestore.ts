@@ -118,7 +118,7 @@ export async function getUserProfile(
       },
       createdAt: data.createdAt?.toDate?.() || new Date(),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getUserProfile", error);
       return null;
@@ -233,7 +233,7 @@ export async function getAllProgressNodes(
         nextReviewAt: data.nextReviewAt?.toDate?.() || undefined,
       };
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getAllProgressNodes", error);
       return [];
@@ -249,7 +249,7 @@ export async function getMasteredConceptsCount(uid: string): Promise<number> {
     const q = query(ref, where("status", "==", "mastered"));
     const snap = await getCountFromServer(q);
     return snap.data().count;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getMasteredConceptsCount", error);
       return 0;
@@ -290,7 +290,7 @@ export async function getProgressStats(uid: string): Promise<{
       totalCorrect: aggSnap.data().totalCorrect || 0,
       totalAttempts: aggSnap.data().totalAttempts || 0,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getProgressStats", error);
     } else {
@@ -394,7 +394,7 @@ export async function getStudySessions(
         averageSpeed: data.averageSpeed || 0,
       };
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getStudySessions", error);
     } else {
@@ -431,7 +431,7 @@ export async function getTodaysStudySessions(
         averageSpeed: data.averageSpeed || 0,
       };
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getTodaysStudySessions", error);
     } else {
@@ -473,7 +473,7 @@ export async function getMentorMemory(
       importantMemories: data.importantMemories || [],
       lastInteraction: data.lastInteraction?.toDate?.() || new Date(),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getMentorMemory", error);
       return null;
@@ -490,8 +490,8 @@ export async function addImportantMemory(uid: string, memory: string) {
       importantMemories: arrayUnion(memory),
       lastInteraction: serverTimestamp(),
     });
-  } catch (error: any) {
-    if (error.code === "not-found") {
+  } catch (error: unknown) {
+    if (error instanceof Error && (error as any).code === "not-found") {
       await setDoc(ref, {
         userId: uid,
         sessionLogs: [],
@@ -521,10 +521,10 @@ export async function syncLongTermProfile(
       importantMemories: importantMemories,
       lastInteraction: serverTimestamp(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (
-      error.code === "not-found" ||
-      error.message?.includes("No document to update")
+      (error instanceof Error && (error as any).code === "not-found") ||
+      (error instanceof Error && error.message.includes("No document to update"))
     ) {
       await setDoc(ref, {
         userId: uid,
@@ -677,7 +677,7 @@ export async function getMockResults(
         completedAt: data.completedAt?.toDate?.() || new Date(),
       };
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getMockResults", error);
       return [];
@@ -871,7 +871,7 @@ export async function getWeeklySpeedAccuracy(uid: string): Promise<{
       orderBy("startTime", "asc")
     );
     snap = await getDocs(q);
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) markFirestoreDenied("getWeeklySpeedAccuracy", error);
     else console.warn("Error in getWeeklySpeedAccuracy:", error);
   }
@@ -968,7 +968,7 @@ export async function getWeakTopics(
       .slice(0, topLimit);
 
     return weak;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (isPermissionDenied(error)) {
       markFirestoreDenied("getWeakTopics", error);
     } else {
