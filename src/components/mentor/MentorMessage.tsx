@@ -245,6 +245,7 @@ function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolea
       className={`rounded-2xl border border-brand-accent/20 bg-gradient-to-br from-blue-50/80 to-indigo-50/60 overflow-hidden ${fullPage ? "my-4" : "my-2"}`}
     >
       <button
+        aria-expanded={expanded}
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-blue-50/50 transition-colors"
       >
@@ -256,21 +257,23 @@ function ConceptCard({ content, fullPage }: { content: string; fullPage?: boolea
         </span>
         {expanded ? <ChevronUp className="w-4 h-4 text-brand-accent/50" /> : <ChevronDown className="w-4 h-4 text-brand-accent/50" />}
       </button>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className={`px-4 pb-4 leading-relaxed text-text-primary ${fullPage ? "text-[15px]" : "text-[13px]"}`}>
-              <ReactMarkdown>{content}</ReactMarkdown>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div aria-live="polite">
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className={`px-4 pb-4 leading-relaxed text-text-primary ${fullPage ? "text-[15px]" : "text-[13px]"}`}>
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
@@ -314,6 +317,7 @@ function MCQCard({
           {options.map((opt) => (
             <button
               key={opt.label}
+              aria-pressed={selected === opt.label}
               onClick={() => handleSelect(opt.label)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-150
                 ${selected === opt.label
@@ -406,6 +410,7 @@ function FeedbackCard({
       {explanation && (
         <>
           <button
+            aria-expanded={showExplanation}
             onClick={() => setShowExplanation(!showExplanation)}
             className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors border-t ${
               correct
@@ -416,20 +421,22 @@ function FeedbackCard({
             <ArrowRight className={`w-3 h-3 transition-transform ${showExplanation ? "rotate-90" : ""}`} />
             {showExplanation ? "Hide explanation" : "Show explanation"}
           </button>
-          <AnimatePresence>
-            {showExplanation && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className={`px-4 pb-4 ${fullPage ? "text-[14px]" : "text-[12px]"} text-text-secondary leading-relaxed`}>
-                  <ReactMarkdown>{explanation}</ReactMarkdown>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div aria-live="polite">
+            <AnimatePresence>
+              {showExplanation && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className={`px-4 pb-4 ${fullPage ? "text-[14px]" : "text-[12px]"} text-text-secondary leading-relaxed`}>
+                    <ReactMarkdown>{explanation}</ReactMarkdown>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </>
       )}
     </motion.div>
