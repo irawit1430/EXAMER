@@ -105,9 +105,11 @@ export async function POST(req: NextRequest) {
 /**
  * GET /api/agent/tools — List all available tools
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   return traceAsync("api.agent.tools.list", {}, async () => {
     try {
+      await getVerifiedUidFromRequest(req);
+
       const registry = getToolRegistry();
       const tools = registry.listToolNames().map((name) => {
         const tool = registry.getTool(name);
@@ -121,6 +123,12 @@ export async function GET() {
 
       return NextResponse.json({ tools, count: tools.length });
     } catch (error: any) {
+      if (error instanceof FirebaseAuthError) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: error.status },
+        );
+      }
       return NextResponse.json(
         { error: error.message || "Failed to list tools" },
         { status: 500 },
