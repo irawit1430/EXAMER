@@ -9,16 +9,20 @@ import { useMetricsStore } from "@/store/useMetricsStore";
  * Provides derived speed metrics and category classification.
  */
 export function useSpeedTracker() {
-  const {
-    speed,
-    avgSecondsPerQuestion,
-    questionsAttempted,
-    correctCount,
-    incorrectCount,
-    consecutiveErrors,
-    startQuestion,
-    recordAnswer,
-  } = useMetricsStore();
+  const speed = useMetricsStore((state) => state.speed);
+  const avgSecondsPerQuestion = useMetricsStore(
+    (state) => state.avgSecondsPerQuestion,
+  );
+  const questionsAttempted = useMetricsStore(
+    (state) => state.questionsAttempted,
+  );
+  const correctCount = useMetricsStore((state) => state.correctCount);
+  const incorrectCount = useMetricsStore((state) => state.incorrectCount);
+  const consecutiveErrors = useMetricsStore(
+    (state) => state.consecutiveErrors,
+  );
+  const startQuestion = useMetricsStore((state) => state.startQuestion);
+  const recordAnswer = useMetricsStore((state) => state.recordAnswer);
 
   const accuracy =
     questionsAttempted > 0
