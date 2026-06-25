@@ -16,7 +16,7 @@ export default function MockTestTakingPage() {
   const subjects = searchParams?.get("subjects") || "General";
   const numQuestions = parseInt(searchParams?.get("q") || "10", 10);
 
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   

@@ -79,7 +79,9 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const { prediction, delta } = usePredictedScore();
-  const { user, profile, syllabusTree } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
+  const syllabusTree = useAuthStore((state) => state.syllabusTree);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 

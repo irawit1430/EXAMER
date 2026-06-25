@@ -6,7 +6,8 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionTe
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function LandingPage() {
-  const { user, initialized } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const initialized = useAuthStore((state) => state.initialized);
   const { scrollYProgress, scrollY } = useScroll();
 
   // 3D Card Hover Effect State
