@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import { Loader2, ArrowRight, CheckCircle2, Trophy, Clock } from "lucide-react";
 import type { QuizQuestion } from "@/types";
 import { useAuthStore } from "@/store/useAuthStore";
-import { saveProgressNode, createStudySession, endStudySession } from "@/lib/firebase/firestore";
+import { saveProgressNodesBatch, createStudySession, endStudySession } from "@/lib/firebase/firestore";
 
 export default function MockTestTakingPage() {
   const { id } = useParams();
@@ -150,16 +150,16 @@ export default function MockTestTakingPage() {
       else if (selected) incorrect++;
     });
 
-    // Optionally update progress nodes if user exists. We use a batch simulation
+    // Optionally update progress nodes if user exists.
     // Since Mock test spans across multiple concepts, we just update the specific concepts tested
     if (user) {
-       const promises = [];
+       const nodesToUpdate = [];
        for (const q of questions) {
          const selected = answers[q.id];
          const isCorrect = selected === q.options.find(o => o.isCorrect)?.id;
          if (selected && q.conceptId) {
             // we do a blind set for mock simulation speed. (ideal app would read and increment properly)
-            promises.push(saveProgressNode(user.uid, {
+            nodesToUpdate.push({
               conceptId: q.conceptId,
               status: isCorrect ? "review_24h" : "learning",
               correctCount: isCorrect ? 1 : 0,
@@ -167,10 +167,12 @@ export default function MockTestTakingPage() {
               mistakeCount: isCorrect ? 0 : 1,
               feynmanClarityScore: 0,
               lastTested: new Date(),
-            } as any).catch(() => {}));
+            } as any);
          }
        }
-       await Promise.all(promises);
+       if (nodesToUpdate.length > 0) {
+         await saveProgressNodesBatch(user.uid, nodesToUpdate).catch(() => {});
+       }
     }
   };
 
