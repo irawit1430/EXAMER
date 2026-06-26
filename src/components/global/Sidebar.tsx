@@ -158,7 +158,7 @@ export default function Sidebar({
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={onToggle}
           className="hidden md:flex items-center justify-center h-12 border-t border-border-default
-            text-text-muted hover:text-text-primary hover:bg-surface-50 transition-colors bg-white w-full"
+            text-text-muted hover:text-text-primary hover:bg-surface-50 transition-colors bg-white w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
