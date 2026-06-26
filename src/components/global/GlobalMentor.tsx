@@ -279,7 +279,7 @@ export default function GlobalMentor() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsTall(!isTall); }}
-                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                     aria-label={isTall ? "Shrink mentor chat" : "Expand mentor chat height"}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
@@ -288,7 +288,7 @@ export default function GlobalMentor() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsMuted((value) => !value); }}
-                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                     aria-label={
                       isMuted ? "Unmute mentor voice" : "Mute mentor voice"
                     }
@@ -303,7 +303,7 @@ export default function GlobalMentor() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); toggleExpanded(); }}
-                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100"
+                    className="rounded-xl p-2 text-text-secondary transition-colors hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                     aria-label="Minimize mentor chat"
                     onPointerDown={(e) => e.stopPropagation()}
                   >
